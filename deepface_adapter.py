@@ -14,6 +14,17 @@ if str(DEEPFACE_ROOT) not in sys.path:
     sys.path.insert(0, str(DEEPFACE_ROOT))
 
 
+def cosine_distance(left: np.ndarray, right: np.ndarray) -> float:
+    """Return cosine distance without requiring SciPy's native extensions."""
+    left = np.asarray(left, dtype=np.float64)
+    right = np.asarray(right, dtype=np.float64)
+    left_norm = float(np.linalg.norm(left))
+    right_norm = float(np.linalg.norm(right))
+    if left_norm == 0.0 or right_norm == 0.0:
+        return 1.0
+    return float(1.0 - np.dot(left, right) / (left_norm * right_norm))
+
+
 class OpenCVFaceBackend:
     """OpenCV-only facial recognition backend - no TensorFlow/PyTorch required."""
 
@@ -381,8 +392,7 @@ class OpenCVFaceBackend:
 
                         # Calculate distance
                         if distance_metric == 'cosine':
-                            from scipy.spatial.distance import cosine
-                            distance = cosine(target_embedding, db_embedding)
+                            distance = cosine_distance(target_embedding, db_embedding)
                         elif distance_metric == 'euclidean':
                             distance = np.linalg.norm(target_embedding - db_embedding)
                         elif distance_metric == 'euclidean_l2':
@@ -390,8 +400,7 @@ class OpenCVFaceBackend:
                                      (np.linalg.norm(target_embedding) + np.linalg.norm(db_embedding))
                         else:
                             # Default to cosine
-                            from scipy.spatial.distance import cosine
-                            distance = cosine(target_embedding, db_embedding)
+                            distance = cosine_distance(target_embedding, db_embedding)
 
                         if distance <= threshold:
                             results.append({
@@ -441,16 +450,14 @@ class OpenCVFaceBackend:
 
             # Calculate distance
             if distance_metric == 'cosine':
-                from scipy.spatial.distance import cosine
-                distance = cosine(emb1, emb2)
+                distance = cosine_distance(emb1, emb2)
             elif distance_metric == 'euclidean':
                 distance = np.linalg.norm(emb1 - emb2)
             elif distance_metric == 'euclidean_l2':
                 distance = np.linalg.norm(emb1 - emb2) / \
                          (np.linalg.norm(emb1) + np.linalg.norm(emb2))
             else:
-                from scipy.spatial.distance import cosine
-                distance = cosine(emb1, emb2)
+                distance = cosine_distance(emb1, emb2)
 
             threshold = {'cosine': 0.4, 'euclidean': 0.55, 'euclidean_l2': 0.75}.get(distance_metric, 0.4)
             verified = distance <= threshold

@@ -10,7 +10,6 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 from PIL import Image
-from scipy.spatial.distance import cosine
 from streamlit.errors import StreamlitSecretNotFoundError
 
 try:
@@ -189,6 +188,17 @@ LAST_THREAT_LOG_TIME = 0.0
 # detector can now handle profile faces and will retry a small frame at a
 # higher scale when necessary.
 PROCESSING_MAX_WIDTH = 1280
+
+
+def reliable_face_matching_available() -> bool:
+    """Return whether the neural recognition runtime is available.
+
+    The OpenCV/HOG fallback is useful for detecting faces, but its handcrafted
+    features cannot safely identify a person. Treating its nearest neighbour
+    as a known person caused unrelated faces to be labelled as registered
+    Staff or the selected Victim.
+    """
+    return DEEPFACE_IMPORT_ERROR is None
 
 
 def invalidate_unknown_face_cache() -> None:
@@ -717,7 +727,13 @@ def calculate_face_distance(
             np.linalg.norm(probe - reference)
             / max(np.linalg.norm(probe) + np.linalg.norm(reference), 1e-8)
         )
-    return float(cosine(probe, reference))
+    probe_norm = float(np.linalg.norm(probe))
+    reference_norm = float(np.linalg.norm(reference))
+    if probe_norm == 0.0 or reference_norm == 0.0:
+        # A zero vector is not a valid face embedding. Treat it as a
+        # non-match instead of producing NaN or importing SciPy.
+        return 1.0
+    return float(1.0 - np.dot(probe, reference) / (probe_norm * reference_norm))
 
 
 def find_face_in_known_cache(
@@ -1060,6 +1076,7 @@ def process_frame(
     attendance_mode = is_member_attendance_mode(mode)
     victim_found = None
     model_name, detector_backend, metric = get_runtime_face_settings()
+    can_match_identities = reliable_face_matching_available()
 
     is_face_rec_mode = "Threat" not in mode
     
@@ -1137,7 +1154,7 @@ def process_frame(
         match_threshold = float(
             st.session_state.get("similarity_threshold", COSINE_THRESHOLD)
         )
-        if victim_search:
+        if victim_search and can_match_identities:
             known_match = (
                 find_face_in_known_cache(
                     face_encoding,
@@ -1149,12 +1166,14 @@ def process_frame(
                 if target_profile_id
                 else None
             )
-        else:
+        elif can_match_identities:
             known_match = find_face_in_known_cache(
                 face_encoding,
                 match_threshold,
                 metric=metric,
             )
+        else:
+            known_match = None
         if known_match:
             name, role = known_match["name"], known_match["role"]
             distance = known_match["distance"]
@@ -1301,6 +1320,17 @@ def process_frame(
             detection_summary = (
                 f"Victim found: {victim_found['name']} at {location}"
             )
+        elif not can_match_identities:
+            detection_summary = (
+                "Face detected. Victim identification requires the neural "
+                "DeepFace runtime; fallback mode will not label a victim."
+            )
+            record_detection_result(
+                "victim_search",
+                details="Victim identification is disabled in OpenCV fallback mode.",
+                location=location,
+                profile_id=target_profile_id or "",
+            )
         else:
             target_name = next(
                 (
@@ -1386,7 +1416,7 @@ def annotate_browser_frame(
             processing_frame, area
         ):
             continue
-        if is_victim_search_mode(mode):
+        if is_victim_search_mode(mode) and reliable_face_matching_available():
             match = (
                 find_face_in_known_cache(
                     face_object.get("embedding", []),
@@ -1398,10 +1428,12 @@ def annotate_browser_frame(
                 if target_profile_id
                 else None
             )
-        else:
+        elif reliable_face_matching_available():
             match = find_face_in_known_cache(
                 face_object.get("embedding", []), threshold, metric=metric
             )
+        else:
+            match = None
 
         if match:
             if is_victim_search_mode(mode):
@@ -2182,8 +2214,9 @@ def render_sidebar() -> None:
             if DEEPFACE_IMPORT_ERROR:
                 st.warning(
                     "Full DeepFace is unavailable here, so the app is using the "
-                    "OpenCV/HOG fallback. Changing model names will not load a "
-                    "neural model until TensorFlow is installed."
+                    "OpenCV/HOG fallback. It can detect faces, but registered and "
+                    "Victim identity matches are disabled to prevent false positives. "
+                    "Install TensorFlow/DeepFace to enable identity matching."
                 )
 
         with st.sidebar.expander("Analysis Features", expanded=False):

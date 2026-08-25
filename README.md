@@ -72,7 +72,7 @@ PowerShell cannot find Streamlit in the active Python environment. From the proj
 
 ```powershell
 # Recommended: run without activating the environment
-.\.venv\Scripts\python.exe -m streamlit run app.py
+.\.venv\Scripts\python.exe -m streamlit run app.
 ```
 
 Alternatively, activate the virtual environment first:
@@ -229,7 +229,7 @@ graph TD
 
 9.  **Structured Audit & Logging Engine:**
     *   **Function:** Records all significant events, alerts, and identifications.
-    *   **Workflow:** Events from operational modes (alerts, identifications) are timestamped and captured -> Data written to real-time CSV logs -> Data is presented in interactive, downloadable Pandas data tables via Streamlit UI.
+    *   **Workflow:** Events from operational modes (alerts, identifications) are timestamped and captured -> Data written to real-time CSV logs -> Data is presented in intepyractive, downloadable Pandas data tables via Streamlit UI.
 
 10. **Streamlit Dashboard (Modern Dark UI):**
     *   **Function:** Provides the central interactive interface for system control, monitoring, and data visualization.

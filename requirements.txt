@@ -5,8 +5,9 @@ numpy==2.4.4
 opencv-python-headless==4.13.0.92
 pandas==3.0.3
 Pillow==12.2.0
-scipy
 streamlit==1.60.0
+# Kept with the base install so the documented project validation command works.
+pytest>=8,<10
 # WebRTC's media stack has no Python 3.14 wheel. On Python 3.14 the app
 # continues to support local webcam, recorded-video, and IP-camera sources.
 streamlit-webrtc==0.77.0; python_version < "3.14"

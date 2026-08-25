@@ -210,6 +210,66 @@ def test_browser_camera_rejects_invalid_fallback_victim_candidate(monkeypatch) -
     assert annotated[10, 10].tolist() == [0, 0, 0]
 
 
+def test_browser_camera_does_not_identify_victim_with_opencv_fallback(monkeypatch) -> None:
+    class FallbackBackend:
+        @staticmethod
+        def represent(**kwargs):
+            return [
+                {
+                    "embedding": [1.0, 0.0],
+                    "facial_area": {"x": 10, "y": 10, "w": 30, "h": 30},
+                }
+            ]
+
+        @staticmethod
+        def is_valid_face_region(*args):
+            return True
+
+    monkeypatch.setattr(app, "DeepFace", FallbackBackend)
+    monkeypatch.setattr(app, "DEEPFACE_IMPORT_ERROR", "TensorFlow is unavailable")
+    monkeypatch.setattr(
+        app,
+        "KNOWN_FACE_ENCODINGS",
+        [{"profile_id": "Victim_test", "role": "Victim", "name": "test", "encoding": [1.0, 0.0]}],
+    )
+    frame = np.zeros((60, 60, 3), dtype=np.uint8)
+
+    annotated = app.annotate_browser_frame(
+        frame, "1. Lost Person Search", "Victim_test", "Facenet", "opencv", "cosine", 0.4
+    )
+
+    # Green means detected but not identified; a false victim alert is red.
+    assert annotated[10, 10].tolist() == [0, 255, 0]
+
+
+def test_browser_camera_identifies_selected_victim_with_neural_runtime(monkeypatch) -> None:
+    class NeuralBackend:
+        @staticmethod
+        def represent(**kwargs):
+            return [
+                {
+                    "embedding": [1.0, 0.0],
+                    "facial_area": {"x": 10, "y": 10, "w": 30, "h": 30},
+                }
+            ]
+
+    monkeypatch.setattr(app, "DeepFace", NeuralBackend)
+    monkeypatch.setattr(app, "DEEPFACE_IMPORT_ERROR", None)
+    monkeypatch.setattr(
+        app,
+        "KNOWN_FACE_ENCODINGS",
+        [{"profile_id": "Victim_test", "role": "Victim", "name": "test", "encoding": [1.0, 0.0]}],
+    )
+    frame = np.zeros((60, 60, 3), dtype=np.uint8)
+
+    annotated = app.annotate_browser_frame(
+        frame, "1. Lost Person Search", "Victim_test", "Facenet", "opencv", "cosine", 0.4
+    )
+
+    # Red is reserved for a verified selected-victim match.
+    assert annotated[10, 10].tolist() == [0, 0, 255]
+
+
 def test_unknown_gallery_resolves_current_image_path(monkeypatch) -> None:
     test_dir = Path(__file__).parent / f"_face_inventory_{uuid4().hex}"
     unknown_dir = test_dir / "unknown_faces"
