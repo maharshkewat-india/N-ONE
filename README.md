@@ -3,6 +3,8 @@
 ## 1. INTRODUCTION
 N-ONE is an Advanced Multi-Mode AI Surveillance & Threat Tracking Platform designed for modern security and monitoring challenges. Leveraging AI-driven computer vision, N-ONE offers a robust solution for lost person tracking, perimeter security, and threat detection. The platform integrates real-time video analysis with facial recognition and weapon detection capabilities. Built on Python 3.10+, N-ONE uses Streamlit for the dashboard, OpenCV for core image processing, and DeepFace models such as Facenet512/ArcFace when the full TensorFlow runtime is available, with an OpenCV fallback. Data logging and analysis are managed via Pandas, while PIL handles image manipulation and WebRTC/OpenCV support versatile camera and video ingestion.
 
+For the model-by-model architecture, detector choice, cosine-distance thresholds, safe configuration changes, and benchmark guidance, see [AI Models and Configuration Guide](docs/AI_MODELS_AND_CONFIGURATION_GUIDE.md).
+
 ## Installation & Quick Start
 
 Follow these steps to get the N-ONE platform running on your local machine.
