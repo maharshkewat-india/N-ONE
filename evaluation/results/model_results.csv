@@ -1,0 +1,5 @@
+model,backend,metric,status,evidence
+Facenet,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
+Facenet512,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
+ArcFace,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
+OpenCVFaceBackend,Haar + HOG/CLAHE fallback,cosine,ACTIVE BASELINE,Actual runtime in this workspace; no benchmark data available.

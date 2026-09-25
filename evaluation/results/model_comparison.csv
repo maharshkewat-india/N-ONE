@@ -1,0 +1,4 @@
+model,status,threshold,tp,tn,fp,fn,precision,recall,f1,far,frr,false_victim_matches,genuine_trials,impostor_trials,error
+Facenet,measured,0.4,21,60,0,11,1.0,0.65625,0.7924528301886793,0.0,0.34375,0,32,60,
+Facenet512,measured,0.4,22,60,0,10,1.0,0.6875,0.8148148148148148,0.0,0.3125,0,32,60,
+ArcFace,measured,0.4,23,60,0,9,1.0,0.71875,0.8363636363636363,0.0,0.28125,0,32,60,

@@ -1,0 +1,10 @@
+model,confirmation_frames,status,reason
+Facenet,1,not_available,No labeled video/frame sequences in evaluation dataset.
+Facenet,3,not_available,No labeled video/frame sequences in evaluation dataset.
+Facenet,5,not_available,No labeled video/frame sequences in evaluation dataset.
+Facenet512,1,not_available,No labeled video/frame sequences in evaluation dataset.
+Facenet512,3,not_available,No labeled video/frame sequences in evaluation dataset.
+Facenet512,5,not_available,No labeled video/frame sequences in evaluation dataset.
+ArcFace,1,not_available,No labeled video/frame sequences in evaluation dataset.
+ArcFace,3,not_available,No labeled video/frame sequences in evaluation dataset.
+ArcFace,5,not_available,No labeled video/frame sequences in evaluation dataset.

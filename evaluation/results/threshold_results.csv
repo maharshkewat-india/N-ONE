@@ -1,0 +1,8 @@
+threshold,metric,model,status,notes
+0.20,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.25,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.30,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.35,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.40,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.45,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
+0.50,cosine,OpenCVFaceBackend,INSUFFICIENT TEST DATA,Threshold values cannot be calibrated without labeled victim and impostor evaluation data.
