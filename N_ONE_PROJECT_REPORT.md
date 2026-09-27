@@ -811,22 +811,6 @@ The final submission should verify access dates and use the university's require
 
 # APPENDICES
 
-## Appendix A - Student Profile
-
-[STUDENT PROFILE REQUIRED - NOT PRESENT IN REPOSITORY]
-
-## Appendix B - Published Paper List
-
-[SUPPLY VERIFIED PUBLICATIONS OR WRITE `NOT APPLICABLE`]
-
-## Appendix C - Plagiarism Report
-
-[PLAGIARISM REPORT REQUIRED - NOT PRESENT IN REPOSITORY]
-
-## Appendix D - PPT Handouts
-
-[PPT HANDOUTS REQUIRED - NOT PRESENT IN REPOSITORY]
-
 ## Appendix E - AI Benchmark Tables
 
 Include the complete contents of `evaluation/results/model_comparison.csv`, `threshold_comparison.csv`, `performance_results.csv`, and `multi_frame_results.csv` after formatting them as Word tables. Do not alter measured values.
