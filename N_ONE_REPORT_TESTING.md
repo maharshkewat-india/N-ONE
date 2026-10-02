@@ -29,3 +29,22 @@ A prior audit recorded 24 passed, 1 failed, and 1 error. That is historical evid
 ## Required next validation
 
 Install `pytest` in the selected supported environment, resolve or explicitly document the metadata-header mismatch, run the full suite, and attach the unedited output. Do not convert source-level test coverage into a passing result without that run.
+
+## Fresh executable validation - 2026-10-01
+
+Command: `d:\n-0ne\.venv\Scripts\python.exe -m pytest tests -q`
+
+Result: 24 passed, 2 failed.
+
+| Test | Actual result | Finding |
+|---|---|---|
+| `test_valid_file_saves_and_updates_metadata_atomically` | Failed | Cross-drive `Path.relative_to(ROOT)` error when the test redirects the dataset root to a Windows temporary directory |
+| `test_dataset_metadata_has_required_columns` | Failed | Test expects `file_path` first; collector and checked-in CSV begin with `id,file_path` |
+
+Syntax command: `python -m py_compile app.py deepface_adapter.py evaluation/collector.py evaluation/scripts/run_benchmark.py evaluation/scripts/evaluate_models.py evaluation/scripts/evaluate_thresholds.py evaluation/scripts/generate_metrics.py`.
+
+Result: the command reached `evaluate_thresholds.py` and reported `SyntaxError: unmatched )` at line 27. This is a current executable defect.
+
+Runtime command: `python -m streamlit run app.py --server.headless true --server.port 8503`.
+
+Result: Streamlit started, HTTP 200 was returned, the page title loaded, and the actual TensorFlow-missing fallback warning was visible. A successful Operator session, live camera, Victim Found event, Staff result, Unknown Re-ID event, or threat alert was not demonstrated.

@@ -41,3 +41,14 @@ All figures must be generated from the current implementation or replaced with a
 - Use `possible` or `heuristic` in threat labels.
 - Mark WebRTC worker annotation as a separate path because it intentionally avoids disk/session writes.
 - Do not depict a SQL database, blockchain, IPFS, encryption layer, or trained threat model because the repository does not implement them.
+
+## Fresh audit figure status - 2026-10-01
+
+| Figure | Title | Source | Status |
+|---|---|---|---|
+| Figure 17 | Verified monolithic architecture | Forensic audit supplement, Mermaid | Ready |
+| Figure 18 | Authentication and lockout flow | Forensic audit supplement, Mermaid | Ready |
+| Figure 19 | Target-restricted Victim Search pipeline | Forensic audit supplement, Mermaid | Ready |
+| Figure 20 | Fresh Streamlit login/fallback state | Live port 8503 | Not retained; browser state contained credential input |
+
+No screenshot file is currently present under `report_evidence/screenshots/`. Screenshot figures must not be marked captured until sanitized image files are supplied.

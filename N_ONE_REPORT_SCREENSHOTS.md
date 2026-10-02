@@ -25,3 +25,7 @@ No approved application screenshots were available in the audited repository. Th
 | 15 | Test output | Not available in current project evidence. |
 
 Screenshots must be captured from the running application and saved under `report_assets/screenshots/` before they are inserted into a Word/PDF submission. No placeholder image should be presented as a real result.
+
+## Fresh audit status - 2026-10-01
+
+The live application was reachable on port 8503 and the login page plus fallback warning were inspected. A screenshot was intentionally not retained because the browser session contained credential input. The workspace screenshot directory currently contains zero image files. All screenshot rows therefore remain unavailable until sanitized captures are produced.

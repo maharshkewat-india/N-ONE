@@ -29,3 +29,13 @@
 - Separate benchmark configuration from production defaults.
 - Never use Victim benchmark values as Staff, Unknown Re-ID, or Threat metrics.
 - Mark unavailable fields as `Not measured in the current implementation/evaluation.`
+
+## Fresh audit tables - 2026-10-01
+
+| Table | Title | Data source | Status |
+|---|---|---|---|
+| Table 20 | Verified project fact sheet | Forensic audit supplement | Verified |
+| Table 21 | Fresh dataset partition counts | `evaluation/dataset_metadata.csv` | Verified |
+| Table 22 | Fresh pytest failures | Current `pytest` output | Verified |
+| Table 23 | Threat model | Forensic audit supplement | Source-grounded analysis |
+| Table 24 | Function-to-module mapping | `N_ONE_FUNCTION_MAPPING.md` | Verified source inventory |

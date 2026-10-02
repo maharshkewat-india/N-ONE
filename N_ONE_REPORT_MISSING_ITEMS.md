@@ -106,3 +106,18 @@ The report must retain the following wording unless new evidence is added:
 - `Multi-frame 1/3/5 confirmation results: Not measured in the current implementation/evaluation.`
 - `Application-wide FPS, latency, RAM, and GPU usage: Not measured in the current implementation/evaluation.`
 - `Training of a new neural network: Not demonstrated; the application uses pretrained/available model interfaces and enrollment comparison.`
+
+## Fresh audit additions - 2026-10-01
+
+- [ ] Repair the unmatched parenthesis in `evaluation/scripts/evaluate_thresholds.py` and rerun syntax validation.
+- [ ] Resolve the Windows cross-drive path assumption exposed by `test_valid_file_saves_and_updates_metadata_atomically`.
+- [ ] Reconcile the metadata header-order contract between `tests/test_evaluation_dataset.py`, `evaluation/collector.py`, and `evaluation/dataset_metadata.csv`.
+- [ ] Capture sanitized, credential-free screenshots of authenticated Admin and Operator workflows.
+- [ ] Demonstrate a usable camera or recorded-video frame under the supported dependency configuration.
+- [ ] Demonstrate Staff recognition with a dedicated labeled test set.
+- [ ] Demonstrate Unknown Re-ID with a repeat observation and verify sighting IDs.
+- [ ] Capture a safe threat-heuristic example and label it as a possible alert, not a confirmed threat.
+- [ ] Record exact hardware, RAM, camera resolution, and GPU state for performance reporting.
+- [ ] Define biometric retention, deletion, access-review, and encryption requirements.
+- [ ] Provide signed institutional front matter and student/guide details.
+- [ ] Generate and independently inspect paginated DOCX/PDF files; page count is currently not evidenced.

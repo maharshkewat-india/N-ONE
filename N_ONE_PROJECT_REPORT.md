@@ -839,3 +839,231 @@ Before submission, verify that the final Word document includes the certificate,
 ## Appendix K - Evidence and validation note
 
 This Markdown report is an evidence-backed technical draft, not the final paginated Word/PDF submission. Its measured content is based on repository files available on 25 September 2026. The current word count is approximately 7,291 words, so the requested 70–80-page target has not been reached. Expanding to that target requires genuine additional material such as approved screenshots, verified institutional front matter, detailed source listings, reproducible test output, and any supplied deployment evidence. It must not be achieved by repeating claims or inventing measurements.
+
+---
+
+# Forensic Audit Supplement - 1 October 2026
+
+## Audit protocol and evidence hierarchy
+
+This supplement records the second evidence pass performed on 1 October 2026. The repository was inspected recursively with project-owned code separated from the bundled `deepface/` dependency tree. The application entry point, adapter, evaluation utilities, result CSVs, tests, configuration files, storage folders, and existing report evidence were inspected. The application was started without changing source code or production data at `http://localhost:8503`; the endpoint returned HTTP 200 and the rendered page title was `N-ONE : NO ONE ESCAPES`.
+
+Evidence is ranked as follows: executable source code and checked-in CSV rows; fresh test, syntax, and runtime observations; existing execution logs and test registers; then narrative README/report statements. The repository contains contradictions. Some evaluation README text says real evaluation data is unavailable, while the dataset and measured comparison CSVs are populated. The populated CSVs and benchmark implementation are stronger direct evidence; the contradiction remains recorded as a documentation defect.
+
+## 1. Verified project fact sheet
+
+| Field | Verified finding |
+|---|---|
+| Project name | N-ONE - NO ONE ESCAPES |
+| Domain | AI-assisted victim search, staff recognition, unknown-person re-identification, and heuristic visual alerting |
+| Entry point | `app.py`, Streamlit `main()` |
+| Application shape | Monolithic Streamlit application with a separate runtime adapter and evaluation utilities |
+| Main storage | Local directories and CSV files; no SQL database found |
+| Authentication | Four required credentials read from environment variables or Streamlit Secrets |
+| Roles | Administrator, Operator, and unauthenticated Guest state |
+| Lockout | Five failed attempts followed by a 60-second session lockout |
+| Default live model | `Facenet` |
+| Default live detector | `opencv` |
+| Default live metric | `cosine` |
+| Default live threshold | `0.40` |
+| Neural runtime gate | Identity matching is disabled when the DeepFace/TensorFlow runtime cannot be imported |
+| Fallback | OpenCV Haar detection with CLAHE-normalized HOG representations |
+| Victim workflow | Target-restricted matching against one selected Victim profile |
+| Staff workflow | Generic known-profile matching in attendance mode; staff-specific accuracy is not measured |
+| Unknown workflow | Sequential application IDs, local face crops, CSV metadata, and an in-memory re-identification cache |
+| Threat workflow | Canny/morphology/contour and HSV warm-colour heuristics; not a trained classifier |
+| Evaluation protocol | Isolated FaceNet/FaceNet512/ArcFace benchmark using RetinaFace, cosine distance, and a threshold sweep |
+| Dataset evidence | 11 enrollment images, 32 genuine victim tests, and 12 impostor images |
+| Fresh test result | 24 passed, 2 failed |
+| Fresh syntax result | `evaluate_thresholds.py` has an unmatched closing parenthesis |
+| Academic identity data | Not available in the current project evidence. |
+
+## 2. Real architecture reconstruction
+
+The current implementation follows a monolithic application architecture. Streamlit controls presentation, session state, authentication UI, role-gated controls, data display, and the rerun lifecycle. The same `app.py` module also performs camera acquisition, frame processing, face representation, matching, unknown registration, CSV persistence, audit logging, and threat heuristics. The adapter is the nearest abstraction boundary: it imports bundled DeepFace when available and otherwise exposes a compatible OpenCV fallback interface.
+
+```mermaid
+flowchart TD
+    Browser[Operator or Administrator browser] --> UI[Streamlit app.py]
+    UI --> Auth[Credential and session-state gate]
+    Auth --> Controls[Role-dependent controls]
+    Controls --> Sources[WebRTC, webcam, file, or IP stream]
+    Sources --> Pipeline[process_frame or annotate_browser_frame]
+    Pipeline --> Threat[OpenCV threat heuristic]
+    Pipeline --> Adapter[deepface_adapter.py]
+    Adapter --> Neural[Bundled DeepFace and TensorFlow if available]
+    Adapter --> Fallback[OpenCV Haar and HOG fallback]
+    Pipeline --> Known[Registered face cache]
+    Pipeline --> Unknown[Unknown face cache and CSV records]
+    Pipeline --> Logs[Audit, victim, and sighting CSV files]
+    UI --> Evaluation[evaluation utilities and benchmark CSVs]
+```
+
+Presentation, authentication, session state, camera ingestion, computer vision, AI model access, matching, unknown re-identification, heuristic threat detection, local storage, logging, and evaluation are present. A separate database service, cloud service, microservice, external IAM service, or SQL transaction layer is not present in the N-ONE-authored implementation.
+
+## 3. Authentication and authorization findings
+
+`load_auth_credentials()` reads `ADMIN_USERNAME`, `ADMIN_PASSWORD`, `OPERATOR_USERNAME`, and `OPERATOR_PASSWORD` from the process environment and then Streamlit Secrets. Missing values cause a runtime error and the sidebar reports that authentication is unavailable. Login comparison uses `hmac.compare_digest`. The role is stored in Streamlit session state.
+
+```mermaid
+flowchart TD
+    Start[Unauthenticated session] --> Read[Read environment or Streamlit Secrets]
+    Read --> Missing{Any credential missing?}
+    Missing -->|Yes| Block[Authentication unavailable]
+    Missing -->|No| Form[Username and password form]
+    Form --> Lock{Session lockout active?}
+    Lock -->|Yes| Wait[Reject until 60 seconds elapse]
+    Lock -->|No| Compare[Constant-time comparisons]
+    Compare --> Valid{Admin or Operator pair valid?}
+    Valid -->|No| Count[Increment failed attempts]
+    Count --> Five{Five failures?}
+    Five -->|Yes| Wait
+    Five -->|No| Form
+    Valid -->|Admin| Admin[Administrator session]
+    Valid -->|Operator| Operator[Operator session]
+```
+
+Administrator-only rendering exposes profile registration, model selection, threshold selection, and destructive data-clear actions. Operators can use monitoring and review functions but do not receive those sidebar controls. The destructive helper functions do not independently verify the role, so authorization is primarily a UI-level boundary rather than a defense-in-depth service authorization layer.
+
+Missing controls are material: passwords are not hashed by N-ONE, there is no MFA, external identity provider, persistent account store, persistent login audit event, encryption-at-rest configuration, TLS configuration in the application, or fine-grained per-record authorization. Credentials must not be included in screenshots, reports, or source control.
+
+## 4. Registration and profile data model
+
+Registration accepts an uploaded image or five guided camera captures: `front`, `left`, `right`, `up`, and `down`. `prepare_single_face_crop()` decodes the image, detects faces, rejects zero or multiple faces, requires a face region of at least 80 by 80 pixels, and creates a crop padded by 25 percent of the larger face dimension. The saved artifact is a face crop rather than the original full image.
+
+Profiles are stored under `registered_faces/` with names such as `Staff_name__front.jpg` and `Victim_name__left.jpg`. Prefixes are normalized by `get_profile_category()`, including legacy `Member` and `Lost` prefixes. Updating a profile removes its existing angle files before saving the new set. The known embedding cache is then rebuilt.
+
+Registration quality affects the entire recognition chain. A false detector box, insufficient face size, pose, blur, or poor crop changes the representation presented to the matcher. Multi-angle enrollment can provide more reference variation, but it does not guarantee successful recognition under unseen lighting, distance, occlusion, or camera quality. The application does not claim that five captures establish absolute identity.
+
+## 5. Victim Search forensic explanation
+
+Victim Search is a target-restricted identity workflow rather than unrestricted identification. The operator selects one stored profile whose category is `Victim`. In `process_frame()`, the matching call supplies both `profile_id=target_profile_id` and `role="Victim"`. A visible identity match is therefore possible only for the selected target when neural identity matching is available.
+
+The per-frame sequence is: resize a wide frame to a maximum width of 1280 pixels; request configured representations; apply stricter fallback candidate validation where available; read model, detector, metric, and threshold; search only the selected Victim cache entries; accept a distance less than or equal to threshold; render `VICTIM FOUND`; save a location-aware sighting; and append a `Victim Found` audit event. Non-target or unknown faces render `FACE DETECTED - NO MATCH` rather than disclosing another identity.
+
+Victim sighting history stores profile ID, name, timestamp, and camera location. A repeat for the same profile and location within 60 seconds is suppressed. The result card displays the selected profile image when available, distance, location, timestamp, model, detector, and metric. A lower distance means greater similarity; the value is not a percentage or probability.
+
+```mermaid
+flowchart LR
+    Frame[Camera frame] --> Detect[Detector and representation]
+    Detect --> Gate{Neural identity runtime available?}
+    Gate -->|No| NoID[Face detected; no Victim identity claim]
+    Gate -->|Yes| Filter[Filter known cache by selected profile and Victim role]
+    Filter --> Distance[Calculate configured distance]
+    Distance --> Threshold{Distance <= threshold?}
+    Threshold -->|Yes| Found[Victim Found + sighting + audit event]
+    Threshold -->|No| NonMatch[Face detected - no match]
+```
+
+If the neural runtime import fails, `reliable_face_matching_available()` returns false and known identity matching is skipped. The fallback can detect a face and save an unknown crop, but it will not label that face as the selected Victim. This is intentional safety behavior against treating a handcrafted HOG nearest neighbour as modern learned face recognition.
+
+## 6. Staff recognition and Unknown Re-ID
+
+Staff profiles use the same registration and known-cache machinery as Victim profiles, but attendance mode searches the generic known-profile cache. A known match is rendered and logged; an unmatched face enters the unknown path. No Staff-only confusion matrix, benchmark protocol, or accuracy value exists. Staff-specific recognition accuracy is not measured in the current implementation/evaluation. Victim benchmark numbers must not be reused as Staff accuracy.
+
+An unmatched crop is written as `unknown_001`, `unknown_002`, and so on. The image is stored under `unknown_faces/`, metadata is appended to `unknown_person_db.csv`, the first sighting is appended to `unknown_sighting_log.csv`, and an audit event is written. The in-memory cache avoids scanning all disk files per frame. Re-identification uses thresholds of 0.40 for cosine, 0.55 for Euclidean, and 0.75 for normalized Euclidean; a two-second ID/location throttle reduces repeated writes.
+
+An unknown ID is an application-level tracking identifier, not a verified real-world identity. It can be falsely associated when embeddings are ambiguous, a crop is poor, people look similar, the camera changes, or a stored image is replaced. The checked-in unknown database contains IDs through `unknown_023`, but that inventory is not an accuracy result. The checked-in sighting CSV also contains blank `sighting_id` values despite the source intending sequential IDs, so it is not yet a reliable primary audit record.
+
+## 7. Threat heuristic findings
+
+Threat mode is exclusive of face recognition. It applies `check_weapon_contours()` and returns before DeepFace face processing. The possible-weapon path converts to grayscale, blurs, applies Canny edges, closes morphology, extracts external contours, and filters by area, aspect ratio, fill ratio, and solidity. The possible-fire path uses HSV warm-colour masks, morphology, contours, and area/fill thresholds.
+
+These outputs are labeled `Possible weapon` and `Possible fire`. A possible weapon is not a confirmed weapon, a possible fire region is not confirmed fire, and the implementation is not FaceNet weapon detection. No trained threat classifier, labeled threat dataset, threat confusion matrix, threat precision, threat recall, FAR, or FRR was found. Threat-detection accuracy is not measured in the current implementation/evaluation.
+
+## 8. Models, detectors, metrics, and benchmark results
+
+| Stage | Implemented examples | Meaning |
+|---|---|---|
+| Face detector | OpenCV Haar, RetinaFace and other DeepFace backends when selected | Locates face regions |
+| Representation model | FaceNet, FaceNet512, ArcFace and other DeepFace options | Produces embeddings |
+| Fallback representation | HOG after grayscale resize and CLAHE | Handcrafted fallback vector |
+| Matcher | Cosine, Euclidean, normalized Euclidean | Computes vector distance |
+| Decision rule | Distance threshold | Produces match/no-match under a protocol |
+
+The live source default is `Facenet` + `opencv` + `cosine` + `0.40`. The isolated benchmark uses `Facenet`, `Facenet512`, and `ArcFace` with `retinaface`, cosine, and thresholds from 0.20 through 0.60. It is not a silent replacement of production configuration.
+
+For vectors $a$ and $b$, the cosine distance is:
+
+$$d_{cos}(a,b) = 1 - \frac{a \cdot b}{\|a\|\|b\|}$$
+
+The implementation returns 1.0 for a zero vector. It does not convert distance into a match percentage.
+
+The metadata has 50 rows: 11 victim enrollment images, 32 genuine victim tests, and 12 impostor images. The five enrolled victim identities are Maharsh, ravendra, shivam, ravi, and shubham. Test conditions include normal, angle, lighting, distance, blur, and multiple_faces. All metadata paths resolved to existing files during the audit. The benchmark creates 60 negative trials because each of 12 impostor images is compared with five victim identities.
+
+| Model | TP | TN | FP | FN | Precision | Recall | F1 | FAR | FRR |
+|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
+| Facenet | 21 | 60 | 0 | 11 | 1.0000 | 0.65625 | 0.79245 | 0.0000 | 0.34375 |
+| Facenet512 | 22 | 60 | 0 | 10 | 1.0000 | 0.68750 | 0.81481 | 0.0000 | 0.31250 |
+| ArcFace | 23 | 60 | 0 | 9 | 1.0000 | 0.71875 | 0.83636 | 0.0000 | 0.28125 |
+
+ArcFace produced the strongest measured result within the evaluated dataset and protocol. This does not establish universal superiority, production accuracy, CCTV accuracy, or suitability for a different detector, threshold, population, or camera environment.
+
+Threshold results show the expected tradeoff. For example, Facenet recall rises from 0.46875 at threshold 0.20 to 1.0 at 0.55, while FAR becomes 0.0166667 at 0.55. Facenet512 reaches recall 0.90625 at 0.55 and 0.60 with FAR 0.0 in this sample. ArcFace reaches recall 0.71875 at 0.40 and 0.90625 at 0.55 with FAR 0.0 in both rows. These are sample-specific observations, not universal calibration recommendations.
+
+Performance evidence reports 55 images per model, average inference latency of 3.591 seconds for Facenet, 3.921 seconds for Facenet512, and 3.878 seconds for ArcFace, with derived FPS of approximately 0.278, 0.255, and 0.258. Latency includes detector, alignment/preprocessing, and representation generation because the API does not expose those stages separately. CPU execution was used; GPU performance was not measured. Application-wide latency, RAM under live operation, camera resolution, and scalable camera count are not measured.
+
+Multi-frame evaluation is unavailable. The result file marks 1, 3, and 5 confirmation frames `not_available` because no labeled video/frame sequence exists. A future experiment should report TP, TN, FP, FN, confirmation latency, and false-alert rate for identical 1/3/5-frame protocols.
+
+## 9. Fresh validation and runtime results
+
+The current project virtual environment ran the root project tests: 24 passed and 2 failed. `test_valid_file_saves_and_updates_metadata_atomically` fails because the test redirects `DATASET_ROOT` to a Windows temporary directory but `save_sample()` computes `target.relative_to(ROOT)`, causing a cross-drive `ValueError`. `test_dataset_metadata_has_required_columns` fails because the test expects `file_path` first while the collector schema and checked-in CSV begin with `id,file_path`. These are evidence-backed defects, not passing tests.
+
+The syntax check compiled the project modules until `evaluate_thresholds.py`, which failed with `SyntaxError: unmatched ')'` at line 27. The application itself started successfully on port 8503, responded HTTP 200, and rendered the actual fallback warning `No module named 'tensorflow'`. The fresh run showed the login page and locked state. No Operator success, Victim Found result, Staff match, unknown re-identification event, threat alert, or usable camera feed was demonstrated. Existing historical execution notes also record WebRTC unavailability and a rejected supplied Operator credential; they are not converted into current success claims.
+
+## 10. Security, privacy, and threat model
+
+N-ONE stores face crops, names or identifiers, camera locations, timestamps, unknown IDs, and event details on local storage. CSV files are human-readable and can be modified outside the application. The application performs some input validation: credential presence, face count, minimum face size, dataset path-segment sanitation, and readable-image checks. These reduce ordinary input errors but do not constitute a production security boundary.
+
+| Threat | Attack surface | Impact | Current control | Missing control | Mitigation |
+|---|---|---|---|---|---|
+| Credential attack | Environment/Secrets and login form | Unauthorized access | Constant-time comparison and temporary lockout | Hashing, MFA, external IAM, durable audit | Use an identity provider or hashed store, MFA, persistent login events |
+| Profile replacement | `registered_faces/` | False known match or missed target | Administrator UI and face validation | Integrity manifest and file ownership | Restrict permissions, hash profiles, require approval |
+| CSV tampering | Audit, unknown, and sighting CSVs | Altered history or locations | Local append/update logic | Transactions and integrity protection | Use a database or signed append-only log |
+| Malicious upload | Registration/evaluation upload | Parser abuse or poisoned enrollment | Image decode and face count | Size limits, scanning, sandboxing | Enforce byte/pixel limits and isolate processing |
+| Path abuse | Stored image paths | Disclosure or overwrite | Collector sanitation and tests | Uniform containment checks | Resolve every destination under an approved root |
+| Camera manipulation | WebRTC, webcam, RTSP/HTTP | Misleading observations | Source probing and empty-frame checks | Authenticated encrypted camera transport | Use TLS/RTSP authentication and network segmentation |
+| Privacy abuse | Gallery and logs | Biometric/location exposure | Role-gated UI | Retention, encryption, least privilege | Define purpose, retention, deletion, and access review |
+| False association | Unknown cache and threshold | Incorrectly linking people | Threshold and write throttling | Calibration and human confirmation | Add quality gates and multi-frame review |
+
+A face match is not absolute identity proof. A possible threat is not proof of a weapon. An unknown ID is not confirmed identity. The system should not be the sole basis for detention, disciplinary action, emergency response, or another serious real-world action.
+
+## 11. Reproducibility and user manual
+
+### Administrator
+
+1. Configure all four credentials through environment variables or Streamlit Secrets.
+2. Start the existing application with `streamlit run app.py`.
+3. Authenticate as Administrator.
+4. Register Staff or Victim with a validated upload or five-angle camera flow.
+5. Review inventory and saved angles.
+6. Select model, detector, metric, and threshold; treat benchmark values as experimental evidence.
+7. Select source and camera location, then start the relevant mode.
+8. Review audit logs, victim sightings, and unknown data.
+9. Use destructive cleanup only after preserving required evidence.
+
+### Operator
+
+1. Authenticate with the configured Operator credential.
+2. Select Lost Person Search, Member Attendance Logger, or Threat Detection Mode.
+3. In Lost Person Search, select exactly one registered Victim.
+4. Enter a camera location and choose a source.
+5. Start surveillance and inspect the annotated frame and status panel.
+6. Treat every match, unknown ID, and possible threat as a review state rather than final fact.
+7. Review history and logs after the feed ends.
+
+### Reproduction commands
+
+```text
+python -m pytest tests -q
+python -m py_compile app.py deepface_adapter.py evaluation/collector.py evaluation/scripts/run_benchmark.py
+python -m streamlit run app.py --server.headless true --server.port 8501
+```
+
+## 12. Evidence-based conclusion and submission decision
+
+N-ONE is a real Streamlit prototype with implemented authentication, role-dependent controls, multi-angle registration, target-restricted Victim Search, generic known-profile attendance, application-level unknown tracking, local CSV logging, and heuristic visual alerting. Its defensible identity claim is narrow: under a selected model, detector, metric, threshold, and runtime, the selected Victim can be reported when the target-filtered comparison passes. Its fallback behavior deliberately refuses identity claims without the neural runtime.
+
+The benchmark provides measured evidence for three neural candidates on a limited still-image protocol. It shows ArcFace as strongest among the evaluated rows at threshold 0.40, with zero false positives in 60 negative trials and nine false rejects in 32 genuine trials. It does not prove Staff accuracy, Unknown Re-ID accuracy, threat-detection accuracy, live-camera accuracy, universal model superiority, or production readiness.
+
+The principal engineering priorities are to repair the threshold-script syntax, reconcile the metadata schema/test contract, establish reproducible browser and camera evidence without exposing credentials, add dedicated Staff/Unknown/Threat tests, define retention and integrity controls, and repeat evaluation with larger independent datasets and labeled video sequences. The Markdown report is technically substantive but not yet a verified 70-85 page paginated academic submission. Certificate, declaration, student identity, guide information, approved screenshots, and final institutional formatting are not available in the current project evidence.

@@ -107,3 +107,24 @@ Audit basis: repository state inspected on 2026-09-25. This register records fac
 - Academic identity details, certificate signatures, plagiarism results, publications, and approved screenshots are absent.
 - `evaluation/README.md` and `evaluation/dataset/README.md` contain legacy text saying that no real evaluation data is present, which conflicts with the populated dataset and measured result CSVs. The measured CSVs are treated as the stronger direct evidence; the contradiction remains recorded for cleanup.
 - The requested DOCX/PDF page count cannot be verified from the Markdown source alone. No generated paginated Word/PDF artifact was present in the audited repository.
+
+## Fresh audit additions - 2026-10-01
+
+| Claim | Evidence file | Function/section | Evidence type | Verified status |
+|---|---|---|---|---|
+| The app starts without source modification | `app.py`, live run on port 8503 | `main()` | Runtime observation; HTTP 200; page title `N-ONE : NO ONE ESCAPES` | Verified |
+| The current environment lacks the neural runtime | `app.py`, `deepface_adapter.py` | import boundary and fallback warning | Runtime warning: `No module named 'tensorflow'` | Verified |
+| Victim Search restricts visible identity matching to the selected Victim | `app.py` | `process_frame()` and `annotate_browser_frame()` | `profile_id` and `role="Victim"` filters | Verified |
+| Fallback mode does not label registered identities | `app.py` | `reliable_face_matching_available()` | Explicit source gate and status text | Verified |
+| Threat mode is heuristic and separate from face recognition | `app.py` | `check_weapon_contours()`, `process_frame()` | Canny/contour/HSV code path | Verified |
+| Dataset contains 11 enrollment, 32 genuine, and 12 impostor images | `evaluation/dataset_metadata.csv` | metadata partitions | CSV count and path existence audit | Verified |
+| ArcFace is strongest within the measured protocol at threshold 0.40 | `evaluation/results/model_comparison.csv` | model comparison | TP/TN/FP/FN and derived metrics | Verified within dataset/protocol only |
+| Threshold sweep includes measured rows | `evaluation/results/threshold_comparison.csv` | threshold comparison | CSV rows from 0.20 through 0.60 | Verified |
+| Performance was measured on CPU only | `evaluation/results/performance_results.csv` | performance table | latency and derived FPS fields | Verified; GPU unavailable |
+| Multi-frame evaluation is unavailable | `evaluation/results/multi_frame_results.csv` | 1/3/5 frame rows | Explicit `not_available` status | Verified |
+| Fresh project tests are not fully passing | pytest output from 2026-10-01 | root `tests/` | 24 passed, 2 failed | Verified |
+| Threshold script has a syntax error | `evaluation/scripts/evaluate_thresholds.py` | `dataset_ready()` | `py_compile` output: unmatched `)` | Verified |
+| Screenshot files are not currently present | `report_evidence/screenshots/` | screenshot inventory | Fresh directory inventory returned zero files | Verified |
+| Staff, Unknown Re-ID, and Threat accuracy are unavailable | `N_ONE_REPORT_TESTING.md` and evaluation results | coverage register | No dedicated benchmarks | Verified |
+
+The fresh runtime audit intentionally did not retain a screenshot containing credentials. The browser login page and fallback warning were inspected live, but no credential-bearing image is treated as report evidence.
