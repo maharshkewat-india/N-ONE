@@ -22,7 +22,15 @@ N-ONE follows a similar processing structure.
 
 A simplified workflow can be represented as: 
 
-**Camera/Video Input → Frame Acquisition → Detection → Branch-Specific Analysis → Decision/Status → Logging → Operator Review** 
+```mermaid
+flowchart LR
+    A["Camera / Video Input"] --> B["Frame Acquisition"]
+    B --> C["Detection"]
+    C --> D["Branch-Specific Analysis"]
+    D --> E["Decision / Status"]
+    E --> F["Logging"]
+    F --> G["Operator Review"]
+```
 
 The exact processing branch depends on the operational mode selected by the operator. 
 
@@ -30,7 +38,14 @@ For face-oriented operations, the system processes the incoming visual informati
 
 For the Victim Search workflow, the system follows a more restricted process: 
 
-**Camera Input → Face Detection → Selected Victim Comparison → Threshold Evaluation → Victim Result → Location/Time Logging** 
+```mermaid
+flowchart LR
+    A["Camera Input"] --> B["Face Detection"]
+    B --> C["Selected Victim Comparison"]
+    C --> D["Threshold Evaluation"]
+    D --> E["Victim Result"]
+    E --> F["Location / Time Logging"]
+```
 
 The threat-detection workflow is separate from the face-recognition workflow. It uses its own implemented threat-analysis logic rather than treating face-recognition model settings as threatdetection settings. 
 
@@ -331,27 +346,14 @@ Structured logs provide a record of relevant system events.
 
 The overall evidence flow can therefore be represented as: 
 
-##### **Input Image/Video** 
-
-↓ 
-
-##### **Detection** 
-
-↓ 
-
-##### **Recognition or Threat Analysis** 
-
-↓ 
-
-##### **Decision/Status** 
-
-- ↓ 
-
-##### **Evidence Record** 
-
-↓ 
-
-##### **Operator Review** 
+```mermaid
+flowchart TD
+    A["Input Image / Video"] --> B["Detection"]
+    B --> C["Recognition or Threat Analysis"]
+    C --> D["Decision / Status"]
+    D --> E["Evidence Record"]
+    E --> F["Operator Review"]
+```
 
 This structure allows the visual result to be considered together with contextual information rather than as an isolated prediction. 
 
@@ -815,7 +817,12 @@ This allows an operator to review available previous observations instead of tre
 
 The objective is to provide information such as: 
 
-##### **Who → Where → When → Recognition Information** 
+```mermaid
+flowchart LR
+    A["Who"] --> B["Where"]
+    B --> C["When"]
+    C --> D["Recognition Information"]
+```
 
 This can be useful during subsequent review of the monitoring process. 
 
@@ -2044,7 +2051,13 @@ rather than neural-network training.
 
 The recognition process consists conceptually of several stages: 
 
-**Face Detection → Representation/Feature Processing → Comparison → Distance/Similarity → Threshold Decision** 
+```mermaid
+flowchart LR
+    A["Face Detection"] --> B["Representation / Feature Processing"]
+    B --> C["Comparison"]
+    C --> D["Distance / Similarity"]
+    D --> E["Threshold Decision"]
+```
 
 The scope includes the configuration and use of these stages according to the available backend. 
 
@@ -2650,7 +2663,13 @@ N-ONE addresses this problem by integrating these activities into a single opera
 
 Traditional surveillance review can involve several independent activities: 
 
-**Camera Monitoring → Manual Identification → Manual Notes → Separate Evidence Storage → Later Review** 
+```mermaid
+flowchart LR
+    A["Camera Monitoring"] --> B["Manual Identification"]
+    B --> C["Manual Notes"]
+    C --> D["Separate Evidence Storage"]
+    D --> E["Later Review"]
+```
 
 This workflow can create repeated manual effort. 
 
@@ -2766,7 +2785,12 @@ A small face may contain insufficient detail for reliable recognition.
 
 This creates an important relationship between: 
 
-**Camera → Subject Distance → Face Resolution → Recognition Quality** 
+```mermaid
+flowchart LR
+    A["Camera"] --> B["Subject Distance"]
+    B --> C["Face Resolution"]
+    C --> D["Recognition Quality"]
+```
 
 The project therefore cannot guarantee the same recognition performance at every camera distance. 
 
@@ -3282,7 +3306,14 @@ The conceptual separation is:
 
 #### **Face Modes** 
 
-**Frame → Face Detection → Representation → Comparison → Threshold → Identity Status** 
+```mermaid
+flowchart LR
+    A["Frame"] --> B["Face Detection"]
+    B --> C["Representation"]
+    C --> D["Comparison"]
+    D --> E["Threshold"]
+    E --> F["Identity Status"]
+```
 
 #### **Threat Mode** 
 
@@ -3640,7 +3671,17 @@ One of the major benefits of N-ONE is the integration of several surveillance fu
 
 A typical workflow can be represented as: 
 
-**Authentication → Profile Selection/Registration → Operational Mode → Video Input → Detection → Analysis → Result → Logging → Operator Review** 
+```mermaid
+flowchart LR
+    A["Authentication"] --> B["Profile Selection / Registration"]
+    B --> C["Operational Mode"]
+    C --> D["Video Input"]
+    D --> E["Detection"]
+    E --> F["Analysis"]
+    F --> G["Result"]
+    G --> H["Logging"]
+    H --> I["Operator Review"]
+```
 
 Without an integrated workflow, an operator may need separate tools for: 
 
@@ -3722,7 +3763,14 @@ N-ONE therefore allows the operator to select a specific Victim before starting 
 
 The workflow becomes: 
 
-**Selected Victim → Camera Input → Face Detection → Target Comparison → Threshold Decision → Victim Result** 
+```mermaid
+flowchart LR
+    A["Selected Victim"] --> B["Camera Input"]
+    B --> C["Face Detection"]
+    C --> D["Target Comparison"]
+    D --> E["Threshold Decision"]
+    E --> F["Victim Result"]
+```
 
 This provides a clear semantic relationship between the search operation and the selected target. 
 
@@ -3800,7 +3848,12 @@ N-ONE allows the operator to provide a camera/location value during monitoring.
 
 A Victim sighting can therefore be associated with information such as: 
 
-**Victim → Camera Location → Timestamp → Recognition Event** 
+```mermaid
+flowchart LR
+    A["Victim"] --> B["Camera Location"]
+    B --> C["Timestamp"]
+    C --> D["Recognition Event"]
+```
 
 This makes the result more useful for subsequent review. 
 
@@ -4555,39 +4608,17 @@ The overall benefit of N-ONE is the creation of an **integrated, evidence-orient
 
 The system connects: 
 
-##### **Controlled Registration** 
-
-↓ 
-
-##### **Target Selection** 
-
-↓ 
-
-##### **Visual Monitoring** 
-
-↓ 
-
-##### **Face/Threat Analysis** 
-
-↓ 
-
-##### **Recognition or Alert** 
-
-↓ 
-
-##### **Location and Timestamp Context** 
-
-↓ 
-
-##### **Structured Logging** 
-
-↓ 
-
-##### **Human Review** 
-
-↓ 
-
-##### **Experimental Evaluation** 
+```mermaid
+flowchart TD
+    A["Controlled Registration"] --> B["Target Selection"]
+    B --> C["Visual Monitoring"]
+    C --> D["Face / Threat Analysis"]
+    D --> E["Recognition or Alert"]
+    E --> F["Location and Timestamp Context"]
+    F --> G["Structured Logging"]
+    G --> H["Human Review"]
+    H --> I["Experimental Evaluation"]
+```
 
 This integration makes N-ONE useful as an academic prototype and research-oriented evaluation platform. 
 
@@ -4715,7 +4746,18 @@ When a face does not match a known profile, the system proceeds to the unknown-p
 
 This creates the following general flow: 
 
-Camera Frame ↓ Face Detection ↓ Face Representation ↓ Known Profile Matching ↓ Match Found? ── Yes → Known Identity Result │ No ↓ Unknown Cache Matching ↓ Existing Unknown? ↙       ↘ Yes        No ↓          ↓ Update     Create Record     Unknown ID 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["Face Detection"]
+    B --> C["Face Representation"]
+    C --> D["Known Profile Matching"]
+    D --> E{"Known match?"}
+    E -->|"Yes"| F["Known Identity Result"]
+    E -->|"No"| G["Unknown Cache Matching"]
+    G --> H{"Existing Unknown?"}
+    H -->|"Yes"| I["Update Existing Unknown"]
+    H -->|"No"| J["Create Record / Unknown ID"]
+```
 
 The exact recognition behavior depends on the active backend and operational mode. 
 
@@ -5098,23 +5140,13 @@ FaceNet is used as a face-representation model. A detected face is converted int
 
 Conceptually: 
 
-Face Image 
-
-↓ 
-
-Face Detection 
-
-↓ 
-
-FaceNet 
-
-↓ 
-
-Numerical Face Representation 
-
-↓ 
-
-Distance Comparison 
+```mermaid
+flowchart TD
+    A["Face Image"] --> B["Face Detection"]
+    B --> C["FaceNet"]
+    C --> D["Numerical Face Representation"]
+    D --> E["Distance Comparison"]
+```
 
 The representation itself is not a person's name. Identity is determined by comparing the representation with stored reference representations. 
 
@@ -5122,27 +5154,14 @@ The representation itself is not a person's name. Identity is determined by comp
 
 FaceNet512 is another representation model available through the neural face-analysis interface. It follows the same general conceptual process: 
 
-Input Face 
-
-↓ 
-
-Preprocessing 
-
-↓ 
-
-FaceNet512 
-
-↓ 
-
-Embedding 
-
-↓ 
-
-Cosine Distance 
-
-↓ 
-
-Threshold Decision 
+```mermaid
+flowchart TD
+    A["Input Face"] --> B["Preprocessing"]
+    B --> C["FaceNet512"]
+    C --> D["Embedding"]
+    D --> E["Cosine Distance"]
+    E --> F["Threshold Decision"]
+```
 
 The use of FaceNet512 does not automatically mean that it will produce better results in every environment. Model performance depends on the dataset, detector, threshold, image quality, pose, lighting, and deployment conditions. 
 
@@ -5164,15 +5183,13 @@ Its purpose is to locate faces within an image so that the detected region can s
 
 The distinction can be represented as: 
 
-Face Processing 
-
-│ ┌────────────┴────────────┐ ↓                         ↓ 
-
-Face Detection             Face Representation ↓                         ↓ 
-
-RetinaFace              FaceNet / FaceNet512 
-
-/ ArcFace 
+```mermaid
+flowchart TD
+    A["Face Processing"] --> B["Face Detection"]
+    A --> C["Face Representation"]
+    B --> D["RetinaFace"]
+    C --> E["FaceNet / FaceNet512 / ArcFace"]
+```
 
 Therefore, RetinaFace should not be described as an identity-recognition model in the project report. 
 
@@ -5188,43 +5205,21 @@ Consequently, detector and representation choices must be recorded separately wh
 
 The general neural recognition pipeline can be represented as follows: 
 
-Camera / Image 
-
-↓ 
-
-Frame Acquisition 
-
-↓ 
-
-Face Detection 
-
-↓ 
-
-Face Region Extraction 
-
-↓ 
-
-Preprocessing ↓ 
-
-Face Representation Model 
-
-↓ 
-
-Embedding / Feature Vector ↓ 
-
-Known Profile Comparison 
-
-↓ 
-
-Cosine Distance 
-
-↓ 
-
-Threshold Evaluation 
-
-↓ 
-
-Match / No Match 
+```mermaid
+flowchart TD
+    A["Camera / Image"] --> B["Frame Acquisition"]
+    B --> C["Face Detection"]
+    C --> D["Face Region Extraction"]
+    D --> E["Preprocessing"]
+    E --> F["Face Representation Model"]
+    F --> G["Embedding / Feature Vector"]
+    G --> H["Known Profile Comparison"]
+    H --> I["Cosine Distance"]
+    I --> J["Threshold Evaluation"]
+    J --> K{"Match?"}
+    K -->|"Yes"| L["Known Identity"]
+    K -->|"No"| M["No Match / Unknown Workflow"]
+```
 
 If no registered profile satisfies the matching condition, the system can proceed to its unknownperson processing path. 
 
@@ -5278,27 +5273,15 @@ The threshold provides the decision boundary between a potential match and a non
 
 For example: 
 
-Detected Face 
-
-↓ 
-
-Generate embedding 
-
-↓ 
-
-Compare with reference 
-
-↓ 
-
-Calculate cosine distance 
-
-↓ 
-
-d ≤ 0.40 ? /          \ Yes           No ↓             ↓ 
-
-Potential       No Match 
-
-Match 
+```mermaid
+flowchart TD
+    A["Detected Face"] --> B["Generate Embedding"]
+    B --> C["Compare with Reference"]
+    C --> D["Calculate Cosine Distance"]
+    D --> E{"Distance <= 0.40?"}
+    E -->|"Yes"| F["Potential Match"]
+    E -->|"No"| G["No Match"]
+```
 
 A threshold that is too strict may reject genuine appearances of the enrolled person. This contributes to false negatives. 
 
@@ -5336,41 +5319,18 @@ The fallback includes:
 
 The simplified processing sequence is: 
 
-Input Image 
-
-↓ 
-
-Haar Face Detection 
-
-↓ 
-
-Frontal/Profile Detection 
-
-↓ 
-
-Overlapping Box Deduplication 
-
-↓ 
-
-Face Crop 
-
-↓ 
-
-64 × 64 Grayscale Representation ↓ 
-
-CLAHE Enhancement 
-
-↓ 
-
-HOG Descriptor 
-
-↓ 
-
-Vector Normalization 
-
-↓ 
-
-Feature Representation 
+```mermaid
+flowchart TD
+    A["Input Image"] --> B["Haar Face Detection"]
+    B --> C["Frontal / Profile Detection"]
+    C --> D["Overlapping Box Deduplication"]
+    D --> E["Face Crop"]
+    E --> F["64 x 64 Grayscale Representation"]
+    F --> G["CLAHE Enhancement"]
+    G --> H["HOG Descriptor"]
+    H --> I["Vector Normalization"]
+    I --> J["Feature Representation"]
+```
 
 #### **64 × 64 Representation** 
 
@@ -5398,49 +5358,28 @@ The N-ONE architecture can therefore be viewed as having two recognition-runtime
 
 #### **Full neural runtime** 
 
-Camera/Image 
-
-↓ 
-
-Face Detection 
-
-↓ 
-
-DeepFace-compatible processing ↓ 
-
-FaceNet / FaceNet512 / ArcFace 
-
-↓ 
-
-Embedding 
-
-↓ 
-
-Cosine Distance 
-
-↓ 
-
-Threshold ↓ 
-
-Identity Decision 
+```mermaid
+flowchart TD
+    A["Camera / Image"] --> B["Face Detection"]
+    B --> C["DeepFace-Compatible Processing"]
+    C --> D["FaceNet / FaceNet512 / ArcFace"]
+    D --> E["Embedding"]
+    E --> F["Cosine Distance"]
+    F --> G["Threshold"]
+    G --> H["Identity Decision"]
+```
 
 #### **OpenCV fallback** 
 
-Camera/Image 
-
-↓ 
-
-OpenCV Face Detection ↓ 
-
-Face Crop ↓ Grayscale + CLAHE ↓ 
-
-HOG Descriptor 
-
-↓ 
-
-Normalized Feature Vector ↓ 
-
-Comparison 
+```mermaid
+flowchart TD
+    A["Camera / Image"] --> B["OpenCV Face Detection"]
+    B --> C["Face Crop"]
+    C --> D["Grayscale + CLAHE"]
+    D --> E["HOG Descriptor"]
+    E --> F["Normalized Feature Vector"]
+    F --> G["Comparison"]
+```
 
 This runtime boundary is important when interpreting experimental results. 
 
@@ -5490,31 +5429,15 @@ The face-recognition path uses face representations and distance comparison.
 
 The threat path instead uses image-processing operations such as: 
 
-Frame 
-
-↓ 
-
-Canny Edge Detection 
-
-↓ 
-
-Morphological Processing 
-
-↓ 
-
-Contour Analysis 
-
-↓ 
-
-Warm HSV Mask 
-
-↓ 
-
-Heuristic Evaluation 
-
-↓ 
-
-Possible Threat / Fire Alert 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["Canny Edge Detection"]
+    B --> C["Morphological Processing"]
+    C --> D["Contour Analysis"]
+    D --> E["Warm HSV Mask"]
+    E --> F["Heuristic Evaluation"]
+    F --> G["Possible Threat / Fire Alert"]
+```
 
 Therefore: 
 
@@ -5526,19 +5449,26 @@ Similarly, a threat alert should not automatically be interpreted as a verified 
 
 The major technical components can be summarized through the following data flow: 
 
-N-ONE INPUT │ ┌────────────────┼────────────────┐ ↓                ↓                ↓ Browser Camera    Local Camera     Video/IP Source │                │                │ └────────────────┼────────────────┘ ↓ Frame Processing │ ┌───────────┴───────────┐ ↓                       ↓ Face Processing         Threat Processing │                       │ Face Detection          Canny / HSV ↓                 / Contours Representation               ↓ ↓                Possible Alert Vector Comparison ↓ Known / Unknown Result │ ┌──────┴──────┐ ↓             ↓ Known          Unknown │             │ 
-
-↓             ↓ 
-
-Victim/Staff     Unknown Re-ID 
-
-│             │ └──────┬──────┘ ↓ 
-
-CSV / Local Logs 
-
-↓ 
-
-Dashboard Review 
+```mermaid
+flowchart TD
+    I1["Browser Camera"] --> P["Frame Processing"]
+    I2["Local Camera"] --> P
+    I3["Video / IP Source"] --> P
+    P --> F["Face Processing"]
+    P --> T["Threat Processing"]
+    F --> D["Face Detection"]
+    D --> R["Representation"]
+    R --> C["Vector Comparison"]
+    C --> K{"Known profile match?"}
+    K -->|"Yes"| KS["Victim / Staff Result"]
+    K -->|"No"| U["Unknown Re-ID"]
+    T --> TH["Canny / HSV / Contours"]
+    TH --> A["Possible Alert"]
+    KS --> L["CSV / Local Logs"]
+    U --> L
+    A --> L
+    L --> O["Dashboard Review"]
+```
 
 This architecture allows N-ONE to process multiple types of visual input while keeping identity recognition, unknown re-identification, and threat analysis logically separated. 
 
@@ -5630,7 +5560,15 @@ The project requirements target Python 3.10+, while the optional neural environm
 
 Therefore, the practical environment can be represented as: 
 
-N-ONE Application │ ├── Base Runtime │      └── Python 3.10+ │ └── Optional Neural Runtime ├── Compatible Python version ├── DeepFace └── TensorFlow 
+```mermaid
+flowchart TD
+    A["N-ONE Application"] --> B["Base Runtime"]
+    B --> C["Python 3.10+"]
+    A --> D["Optional Neural Runtime"]
+    D --> E["Compatible Python Version"]
+    D --> F["DeepFace"]
+    D --> G["TensorFlow"]
+```
 
 This separation is important because installing the base application does not necessarily guarantee that the complete neural recognition stack will be available. 
 
@@ -5709,7 +5647,14 @@ The browser requests permission to access the local camera and provides frames t
 
 The general flow is: 
 
-Local Camera ↓ Web Browser ↓ Camera Permission ↓ WebRTC ↓ N-ONE Application ↓ Frame Processing 
+```mermaid
+flowchart LR
+    A["Local Camera"] --> B["Web Browser"]
+    B --> C["Camera Permission"]
+    C --> D["WebRTC"]
+    D --> E["N-ONE Application"]
+    E --> F["Frame Processing"]
+```
 
 This approach is particularly useful for remote deployment because the server does not need direct operating-system access to the user's physical webcam. 
 
@@ -5721,17 +5666,13 @@ The application can probe available camera indices and Windows camera backends t
 
 The basic flow is: 
 
-USB / Built-in Webcam 
-
-↓ 
-
-Operating System 
-
-↓ 
-
-OpenCV ↓ N-ONE ↓ 
-
-Frame Processing 
+```mermaid
+flowchart LR
+    A["USB / Built-in Webcam"] --> B["Operating System"]
+    B --> C["OpenCV"]
+    C --> D["N-ONE"]
+    D --> E["Frame Processing"]
+```
 
 This method is most appropriate when the N-ONE application is running on the same machine that has physical access to the webcam. 
 
@@ -5751,9 +5692,12 @@ N-ONE can also accept an IP-camera stream through an OpenCV-compatible URL.
 
 Conceptually: 
 
-IP Camera ↓ Network Stream ↓ OpenCV ↓ 
-
-N-ONE Processing 
+```mermaid
+flowchart LR
+    A["IP Camera"] --> B["Network Stream"]
+    B --> C["OpenCV"]
+    C --> D["N-ONE Processing"]
+```
 
 Actual performance depends on the network connection, stream format, camera configuration, resolution, and processing hardware. 
 
@@ -5831,7 +5775,13 @@ This prevents a continuously visible Victim from generating excessive duplicate 
 
 The concept can be represented as: 
 
-Victim detected ↓ Check profile + location ↓ Recent record < 60 sec? /          \ Yes           No ↓             ↓ Suppress       Write event duplicate 
+```mermaid
+flowchart TD
+    A["Victim detected"] --> B["Check profile + location"]
+    B --> C{"Recent record < 60 sec?"}
+    C -->|"Yes"| D["Suppress duplicate event"]
+    C -->|"No"| E["Write event"]
+```
 
 This does not mean that the Victim cannot be detected again during the interval. It means that duplicate audit writes are suppressed according to the implemented rule. 
 
@@ -5853,7 +5803,16 @@ Maximum login attempts = 5 Lockout duration       = 60 seconds
 
 The simplified process is: 
 
-Login Attempt ↓ Credential Check ↓ Failed? ↓       ↓ No      Yes ↓       ↓ Login   Increase failure count ↓ 5 failures? /     \ No       Yes ↓        ↓ Continue     Lockout 60 sec 
+```mermaid
+flowchart TD
+    A["Login Attempt"] --> B["Credential Check"]
+    B --> C{"Credentials valid?"}
+    C -->|"Yes"| D["Login"]
+    C -->|"No"| E["Increase failure count"]
+    E --> F{"5 failures reached?"}
+    F -->|"No"| G["Continue / allow retry"]
+    F -->|"Yes"| H["Lockout for 60 seconds"]
+```
 
 This provides a basic protection mechanism against repeated incorrect login attempts. 
 
@@ -5975,9 +5934,33 @@ The overall architecture begins with an authenticated Administrator or Operator 
 
 The high-level workflow represented in the architecture is: 
 
-Administrator / Operator ↓ 
-
-Streamlit Security Gate ↓ Role and Session State ↓ Processing Mode Selection ↓ Video Source ↓ ┌────────┴───────────┐ ↓                    ↓ Browser / WebRTC    OpenCV-based Camera             Input Sources ↓                    ↓ └────────┬───────────┘ ↓ Mode ↓ ┌────────┼───────────────────┐ ↓        ↓                   ↓ Victim   Staff /          Threat Detection Search   Attendance ↓        ↓                   ↓ Face Recognition /      Possible Alert Matching                     ↓ ↓                       Audit Log Known / Unknown ↓ Unknown Cache ↓ CSV / Local Storage ↓ Inventory, Results, History and Logs 
+```mermaid
+flowchart TD
+    A["Administrator / Operator"] --> B["Streamlit Security Gate"]
+    B --> C["Role and Session State"]
+    C --> D["Processing Mode Selection"]
+    D --> E["Video Source"]
+    E --> F["Browser / WebRTC"]
+    E --> G["OpenCV Camera Input"]
+    E --> H["Recorded Video"]
+    E --> I["IP / RTSP Source"]
+    F --> J["Frame Processing"]
+    G --> J
+    H --> J
+    I --> J
+    J --> K["Victim Search"]
+    J --> L["Staff / Attendance"]
+    J --> M["Threat Detection"]
+    K --> N["Face Recognition / Matching"]
+    L --> N
+    N --> O["Known / Unknown Result"]
+    O --> P["Unknown Cache"]
+    O --> Q["Audit Log"]
+    M --> Q
+    P --> R["CSV / Local Storage"]
+    Q --> R
+    R --> S["Inventory, Results, History, and Logs"]
+```
 
 This architecture illustrates that N-ONE does not send every frame through exactly the same processing operation. The selected operational mode determines which processing path is executed. 
 
@@ -6015,9 +5998,13 @@ The presentation layer therefore acts as the main interaction point between the 
 
 The first architectural component is the authentication/security gate. 
 
-Administrator / Operator ↓ Authentication ↓ Credential Validation ↓ Role Identification ↓ 
-
-Session State 
+```mermaid
+flowchart TD
+    A["Administrator / Operator"] --> B["Authentication"]
+    B --> C["Credential Validation"]
+    C --> D["Role Identification"]
+    D --> E["Session State"]
+```
 
 The authenticated role controls access to different parts of the application. 
 
@@ -6055,11 +6042,12 @@ The architecture supports multiple types of sources.
 
 The browser camera path allows a user's camera to provide frames through WebRTC. 
 
-Camera ↓ 
-
-Browser ↓ WebRTC ↓ 
-
-N-ONE 
+```mermaid
+flowchart LR
+    A["Camera"] --> B["Browser"]
+    B --> C["WebRTC"]
+    C --> D["N-ONE"]
+```
 
 This approach is useful when the application is being accessed remotely because the server does not need direct access to the client's physical camera. 
 
@@ -6067,11 +6055,11 @@ This approach is useful when the application is being accessed remotely because 
 
 For a locally running deployment, OpenCV can access compatible webcams through the operating system. 
 
-Local Webcam ↓ 
-
-OpenCV ↓ 
-
-N-ONE 
+```mermaid
+flowchart LR
+    A["Local Webcam"] --> B["OpenCV"]
+    B --> C["N-ONE"]
+```
 
 #### **Recorded video** 
 
@@ -6083,17 +6071,12 @@ This is particularly useful during controlled evaluation because the same video 
 
 An IP camera stream can be passed to OpenCV using a compatible stream URL. 
 
-IP Camera 
-
-↓ 
-
-Network Stream ↓ 
-
-OpenCV 
-
-↓ 
-
-##### N-ONE 
+```mermaid
+flowchart LR
+    A["IP Camera"] --> B["Network Stream"]
+    B --> C["OpenCV"]
+    C --> D["N-ONE"]
+```
 
 The exact performance of an IP-camera source depends on network conditions, stream configuration, resolution, and processing resources. 
 
@@ -6113,7 +6096,19 @@ These modes do not use exactly the same processing logic.
 
 The architecture can therefore be represented as: 
 
-Video Source ↓ Mode Selection ↓ ┌───────────────┼────────────────┐ ↓               ↓                ↓ Victim Search   Staff/Attendance   Threat Detection ↓               ↓                ↓ Face Matching    Face Matching     CV Heuristics ↓               ↓                ↓ Victim Result    Known/Unknown     Possible Alert 
+```mermaid
+flowchart TD
+    A["Video Source"] --> B["Mode Selection"]
+    B --> C["Victim Search"]
+    B --> D["Staff / Attendance"]
+    B --> E["Threat Detection"]
+    C --> F["Target Face Matching"]
+    D --> G["Known-Profile Face Matching"]
+    E --> H["CV Heuristics"]
+    F --> I["Victim Result"]
+    G --> J["Known / Unknown Result"]
+    H --> K["Possible Alert"]
+```
 
 This separation is important because the face-recognition system and the threat-detection system have different technical purposes. 
 
@@ -6123,11 +6118,19 @@ The face-recognition path is responsible for detecting faces, generating represe
 
 The general pipeline is: 
 
-Frame ↓ Face Detection ↓ Face Region ↓ Face Representation ↓ Embedding / Feature Vector ↓ 
-
-Known Cache ↓ Distance Comparison ↓ Threshold Decision ↓ 
-
-Known / Unknown 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["Face Detection"]
+    B --> C["Face Region"]
+    C --> D["Face Representation"]
+    D --> E["Embedding / Feature Vector"]
+    E --> F["Known Cache"]
+    F --> G["Distance Comparison"]
+    G --> H["Threshold Decision"]
+    H --> I{"Known match?"}
+    I -->|"Yes"| J["Known Identity"]
+    I -->|"No"| K["Unknown Workflow"]
+```
 
 The architecture contains a DeepFace-compatible adapter so that the application can work with the configured neural runtime when its dependencies are available. 
 
@@ -6149,11 +6152,18 @@ One of the most important architectural elements in N-ONE is the conditional bou
 
 The supplied architecture diagram represents this decision as: 
 
-Frame ↓ DeepFace-compatible adapter ↓ TensorFlow / DeepFace 
-
-available? 
-
-/       \ Yes        No ↓          ↓ Selected      OpenCV Haar + neural model  HOG/CLAHE fallback and detector       ↓ ↓         Face detection / Embedding       fallback features comparison          ↓ ↓         Fallback safety Threshold            boundary decision               ↓ Detection-only 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["DeepFace-Compatible Adapter"]
+    B --> C{"TensorFlow / DeepFace available?"}
+    C -->|"Yes"| D["Selected Neural Model + Detector"]
+    D --> E["Face Detection and Embedding"]
+    E --> F["Comparison and Threshold Decision"]
+    C -->|"No"| G["OpenCV Haar + HOG / CLAHE"]
+    G --> H["Face Detection / Fallback Features"]
+    H --> I["Fallback Safety Boundary"]
+    I --> J["Detection-Only Result"]
+```
 
 This boundary prevents the application from assuming that the neural runtime is always available. 
 
@@ -6163,7 +6173,18 @@ When TensorFlow/DeepFace is available, the application can use the selected neur
 
 The conceptual workflow is: 
 
-Frame ↓ DeepFace-compatible adapter ↓ Selected detector ↓ Face region ↓ Selected representation model ↓ Embedding ↓ Embedding comparison ↓ Cosine distance ↓ Threshold decision ↓ Recognition result 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["DeepFace-Compatible Adapter"]
+    B --> C["Selected Detector"]
+    C --> D["Face Region"]
+    D --> E["Selected Representation Model"]
+    E --> F["Embedding"]
+    F --> G["Embedding Comparison"]
+    G --> H["Cosine Distance"]
+    H --> I["Threshold Decision"]
+    I --> J["Recognition Result"]
+```
 
 The neural model generates a numerical representation of the detected face. That representation is compared with the stored representation associated with the candidate profile. 
 
@@ -6189,17 +6210,15 @@ The fallback path uses:
 
 The conceptual pipeline is: 
 
-Frame ↓ 
-
-OpenCV Haar Detection ↓ 
-
-Face Region ↓ Grayscale Processing ↓ 
-
-CLAHE ↓ 
-
-HOG Features ↓ 
-
-Normalized Feature Vector 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["OpenCV Haar Detection"]
+    B --> C["Face Region"]
+    C --> D["Grayscale Processing"]
+    D --> E["CLAHE"]
+    E --> F["HOG Features"]
+    F --> G["Normalized Feature Vector"]
+```
 
 This fallback should not be described as a neural face-recognition network. 
 
@@ -6217,15 +6236,16 @@ In particular, when the OpenCV fallback is being used, visible identity matching
 
 This can be summarized as: 
 
-Neural runtime available ↓ 
-
-Identity matching possible ↓ 
-
-Threshold decision ↓ Victim result 
-
-Neural runtime unavailable ↓ OpenCV fallback ↓ Face detection / fallback features ↓ Safety boundary ↓ 
-
-No unsupported Victim identity label 
+```mermaid
+flowchart TD
+    A{"Neural runtime available?"} -->|"Yes"| B["Identity Matching"]
+    B --> C["Threshold Decision"]
+    C --> D["Victim Result"]
+    A -->|"No"| E["OpenCV Fallback"]
+    E --> F["Face Detection / Fallback Features"]
+    F --> G["Safety Boundary"]
+    G --> H["No Unsupported Victim Identity Label"]
+```
 
 This architecture is particularly important because a false Victim identification can have a much greater operational impact than simply reporting that a face was detected. 
 
@@ -6237,27 +6257,19 @@ The operator first selects a Victim profile and provides the camera location.
 
 The architecture then restricts the recognition search to the selected target. 
 
-Operator ↓ 
-
-Select Victim ↓ Enter Camera Location ↓ Video Frame 
-
-↓ 
-
-Face Detection ↓ 
-
-Victim-specific Candidate 
-
-↓ 
-
-Embedding Comparison 
-
-↓ 
-
-Threshold Decision 
-
-↓ 
-
-Victim Found / No Match 
+```mermaid
+flowchart TD
+    A["Operator"] --> B["Select Victim"]
+    B --> C["Enter Camera Location"]
+    C --> D["Video Frame"]
+    D --> E["Face Detection"]
+    E --> F["Victim-Specific Candidate"]
+    F --> G["Embedding Comparison"]
+    G --> H["Threshold Decision"]
+    H --> I{"Target accepted?"}
+    I -->|"Yes"| J["Victim Found"]
+    I -->|"No"| K["No Match"]
+```
 
 If a genuine target match is produced, the application can generate a Victim Found event. 
 
@@ -6291,11 +6303,16 @@ Unlike Victim Search, it is not restricted to a single selected Victim.
 
 The conceptual process is: 
 
-Frame ↓ Face Detection ↓ Face Representation ↓ Known Profile Cache ↓ Compare with Candidates ↓ 
-
-Match? 
-
-/   \ Yes   No ↓     ↓ Staff  Unknown Result Processing 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["Face Detection"]
+    B --> C["Face Representation"]
+    C --> D["Known Profile Cache"]
+    D --> E["Compare with Candidates"]
+    E --> F{"Match?"}
+    F -->|"Yes"| G["Staff Result"]
+    F -->|"No"| H["Unknown Processing"]
+```
 
 The system can therefore distinguish between registered people and unmatched observations. 
 
@@ -6307,7 +6324,17 @@ When a detected face does not match the appropriate known-profile cache, N-ONE c
 
 The architecture is: 
 
-Known Profile Match ↓ No Match ↓ Unknown Cache ↓ Previously observed? /       \ Yes        No ↓          ↓ Update       Create record       unknown ID ↓          ↓ Update       Save crop history      + metadata \      / ↓    ↓ Sighting Log 
+```mermaid
+flowchart TD
+    A["Known Profile Match"] --> B["No Match"]
+    B --> C["Unknown Cache"]
+    C --> D{"Previously observed?"}
+    D -->|"Yes"| E["Update Existing Unknown ID"]
+    D -->|"No"| F["Create Unknown ID"]
+    E --> G["Update Crop / History / Metadata"]
+    F --> G
+    G --> H["Sighting Log"]
+```
 
 New unknown individuals receive locally generated identifiers such as: 
 
@@ -6325,7 +6352,16 @@ It does not use FaceNet, FaceNet512, ArcFace, or the face-recognition cosine thr
 
 Instead, the architecture uses image-processing heuristics. 
 
-Video Frame ↓ Canny Edge Detection ↓ Morphological Processing ↓ Contour Analysis ↓ Warm HSV Mask ↓ Heuristic Evaluation ↓ Possible Threat / Fire Alert ↓ Audit Logging 
+```mermaid
+flowchart TD
+    A["Video Frame"] --> B["Canny Edge Detection"]
+    B --> C["Morphological Processing"]
+    C --> D["Contour Analysis"]
+    D --> E["Warm HSV Mask"]
+    E --> F["Heuristic Evaluation"]
+    F --> G["Possible Threat / Fire Alert"]
+    G --> H["Audit Logging"]
+```
 
 The result is intentionally represented as a **possible threat/fire indication** . 
 
@@ -6383,9 +6419,14 @@ The dashboard can display:
 
 The overall output path is: 
 
-Processing ↓ 
-
-Result Generation ↓ Dashboard ↓ Local Logs ↓ Review / Analysis 
+```mermaid
+flowchart TD
+    A["Processing"] --> B["Result Generation"]
+    B --> C["Dashboard"]
+    B --> D["Local Logs"]
+    C --> E["Review / Analysis"]
+    D --> E
+```
 
 This provides a closed operational loop from camera input to human review. 
 
@@ -6497,17 +6538,21 @@ Contains:
 
 Contains: 
 
-- Registered face images 
-
-- ● Unknown face images ● CSV metadata ● Victim sighting records 
-
-- Unknown sighting records 
-
-- Audit information 
+- Registered face images
+- Unknown face images
+- CSV metadata
+- Victim sighting records
+- Unknown sighting records
+- Audit information
 
 The architecture can therefore be summarized as: 
 
-┌──────────────────────────────────────┐ │         PRESENTATION LAYER           │ │       Streamlit Dashboard            │ │  Login | Search | Monitoring | Logs  │ └──────────────────┬───────────────────┘ ↓ ┌──────────────────────────────────────┐ │          PROCESSING LAYER             │ │ Face Recognition | Victim Search      │ │ Staff | Unknown Re-ID | Threat        │ │ Camera / Video Processing             │ └──────────────────┬───────────────────┘ ↓ ┌──────────────────────────────────────┐ │            STORAGE LAYER              │ │ Profiles | Unknowns | CSV Logs       │ │ Victim Sightings | Audit Records     │ └──────────────────────────────────────┘ 
+```mermaid
+flowchart TD
+    P["PRESENTATION LAYER<br/>Streamlit Dashboard<br/>Login | Search | Monitoring | Logs"]
+    P --> R["PROCESSING LAYER<br/>Face Recognition | Victim Search<br/>Staff | Unknown Re-ID | Threat<br/>Camera / Video Processing"]
+    R --> S["STORAGE LAYER<br/>Profiles | Unknowns | CSV Logs<br/>Victim Sightings | Audit Records"]
+```
 
 ## **9.16 Figure Interpretation** 
 
@@ -6517,7 +6562,16 @@ The architecture figures supplied for this chapter should be interpreted as comp
 
 The overall architecture figure shows the movement from: 
 
-**Administrator/Operator → Security Gate → Role/Session State → Processing Mode → Video Source → Processing → Results → Inventory/Logs/History** 
+```mermaid
+flowchart LR
+    A["Administrator / Operator"] --> B["Security Gate"]
+    B --> C["Role / Session State"]
+    C --> D["Processing Mode"]
+    D --> E["Video Source"]
+    E --> F["Processing"]
+    F --> G["Results"]
+    G --> H["Inventory / Logs / History"]
+```
 
 This figure provides the broad system-level view. 
 
@@ -6559,7 +6613,17 @@ The storage figure should show how registered profiles, unknown profiles, Victim
 
 The recognition pipeline figure should show: 
 
-Frame ↓ Detection ↓ Representation ↓ Known Cache ↓ Distance Comparison ↓ Threshold ↓ Known / Unknown 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["Detection"]
+    B --> C["Representation"]
+    C --> D["Known Cache"]
+    D --> E["Distance Comparison"]
+    E --> F["Threshold"]
+    F --> G{"Known match?"}
+    G -->|"Yes"| H["Known"]
+    G -->|"No"| I["Unknown"]
+```
 
 with the conditional neural/fallback boundary represented where appropriate. 
 
@@ -6858,7 +6922,13 @@ Possible sources include:
 
 The flow is: 
 
-Camera / Video Source ↓ Frame Input ↓ Frame Processing ↓ Resolution / Image Preparation ↓ Selected Mode 
+```mermaid
+flowchart TD
+    A["Camera / Video Source"] --> B["Frame Input"]
+    B --> C["Frame Processing"]
+    C --> D["Resolution / Image Preparation"]
+    D --> E["Selected Mode"]
+```
 
 At this point the system determines whether the frame should enter: 
 
@@ -6874,9 +6944,19 @@ At this point the system determines whether the frame should enter:
 
 The face-recognition DFD describes the transformation of a camera frame into a recognition result. 
 
-Camera Frame ↓ Face Detection ↓ Detected Face Region ↓ Face Representation ↓ Embedding / Feature Vector ↓ Known Profile Cache ↓ Distance Comparison ↓ Threshold Decision ↓ 
-
-Known / No Match 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["Face Detection"]
+    B --> C["Detected Face Region"]
+    C --> D["Face Representation"]
+    D --> E["Embedding / Feature Vector"]
+    E --> F["Known Profile Cache"]
+    F --> G["Distance Comparison"]
+    G --> H["Threshold Decision"]
+    H --> I{"Known match?"}
+    I -->|"Yes"| J["Known Identity"]
+    I -->|"No"| K["No Match / Unknown Workflow"]
+```
 
 When the neural runtime is available, the representation can be generated using the selected neural model. 
 
@@ -6896,7 +6976,24 @@ The major input data are:
 
 The flow is: 
 
-Operator │ ├── Select Victim │ └── Enter Camera Location │ ↓ Victim Search Process │ ↓ Camera Frame │ ↓ Face Detection │ ↓ Selected Victim Cache │ ↓ Embedding Comparison │ ↓ Distance Value │ ↓ Threshold Decision /       \ Match     No Match │          │ ↓          ↓ Victim Found   Continue │ ↓ Sighting Record │ ↓ Dashboard Card 
+```mermaid
+flowchart TD
+    A["Operator"] --> B["Select Victim"]
+    A --> C["Enter Camera Location"]
+    B --> D["Victim Search Process"]
+    C --> D
+    D --> E["Camera Frame"]
+    E --> F["Face Detection"]
+    F --> G["Selected Victim Cache"]
+    G --> H["Embedding Comparison"]
+    H --> I["Distance Value"]
+    I --> J["Threshold Decision"]
+    J --> K{"Match?"}
+    K -->|"Yes"| L["Victim Found"]
+    K -->|"No"| M["Continue Search"]
+    L --> N["Sighting Record"]
+    N --> O["Dashboard Card"]
+```
 
 When a valid target match occurs, the resulting Victim Found event can contain: 
 
@@ -6926,7 +7023,20 @@ Unknown Re-ID is activated when a detected face does not produce a suitable know
 
 The data flow is: 
 
-Detected Face ↓ Known Profile Comparison ↓ No Match ↓ Unknown Cache Comparison ↓ Existing Unknown? /          \ Yes           No │             │ ↓             ↓ Update         Generate Unknown ID     Unknown ID │             │ ↓             ↓ Update         Save Face Crop Metadata       + Metadata │             │ └──────┬──────┘ ↓ Sighting Record ↓ unknown_sighting_log.csv 
+```mermaid
+flowchart TD
+    A["Detected Face"] --> B["Known Profile Comparison"]
+    B --> C["No Match"]
+    C --> D["Unknown Cache Comparison"]
+    D --> E{"Existing Unknown?"}
+    E -->|"Yes"| F["Update Unknown ID"]
+    E -->|"No"| G["Generate Unknown ID"]
+    F --> H["Update Crop / Metadata"]
+    G --> I["Save Face Crop / Metadata"]
+    H --> J["Sighting Record"]
+    I --> J
+    J --> K["unknown_sighting_log.csv"]
+```
 
 A new unknown receives an identifier such as: 
 
@@ -6940,9 +7050,18 @@ This provides repeated-observation context without claiming the person's real-wo
 
 Threat Detection follows an independent data flow. 
 
-Camera Frame ↓ Canny Edge Detection ↓ Morphological Processing ↓ Contour Geometry ↓ Warm HSV Mask ↓ Heuristic Analysis ↓ Possible Threat / Fire ↓ Alert Throttling ↓ Audit Record ↓ 
-
-Dashboard 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["Canny Edge Detection"]
+    B --> C["Morphological Processing"]
+    C --> D["Contour Geometry"]
+    D --> E["Warm HSV Mask"]
+    E --> F["Heuristic Analysis"]
+    F --> G["Possible Threat / Fire"]
+    G --> H["Alert Throttling"]
+    H --> I["Audit Record"]
+    I --> J["Dashboard"]
+```
 
 The important point is that this data flow does not contain the face-recognition embedding or cosine-distance process. 
 
@@ -6972,7 +7091,23 @@ victim_sighting_log.csv
 
 The flow can be represented as: 
 
-Processing Result ↓ Determine Event Type ↓ ┌─────┼──────────┬─────────────┐ ↓     ↓          ↓             ↓ Victim Unknown  Threat       General Event   Event    Alert        Audit ↓       ↓        ↓             ↓ CSV     CSV      CSV/Log      Audit \    |       |          / \   |       |         / Local Storage 
+```mermaid
+flowchart TD
+    A["Processing Result"] --> B["Determine Event Type"]
+    B --> C["Victim Event"]
+    B --> D["Unknown Event"]
+    B --> E["Threat Alert"]
+    B --> F["General Audit Event"]
+    C --> G["victim_sighting_log.csv"]
+    D --> H["unknown_person_db.csv"]
+    D --> I["unknown_sighting_log.csv"]
+    E --> J["Audit Log"]
+    F --> J
+    G --> K["Local Storage"]
+    H --> K
+    I --> K
+    J --> K
+```
 
 The actual project storage is based on local files and CSV records rather than a SQL database server. 
 
@@ -7024,31 +7159,49 @@ These records support review and evaluation of application behavior.
 
 The complete logical data flow can be summarized as: 
 
-USER │ ↓ Authentication │ ↓ 
-
-Role / Session │ ↓ Dashboard │ ↓ Mode + Camera │ ↓ Frame Processing │ ┌─────────┼─────────┐ ↓         ↓         ↓ Victim     Staff     Threat Search   Attendance  Detection │         │         │ └────┬────┘         │ ↓              ↓ Face Recognition   CV Heuristics │              │ ┌─────┴─────┐        │ ↓           ↓        ↓ Known       Unknown   Alert │           │        │ │ ↓ │ │        Unknown    │ │          Re-ID    │ │           │        │ └─────┬─────┴────────┘ ↓ Event / Result ↓ Local Data Store ↓ Dashboard Review 
+```mermaid
+flowchart TD
+    A["User"] --> B["Authentication"]
+    B --> C["Role / Session"]
+    C --> D["Dashboard"]
+    D --> E["Mode + Camera"]
+    E --> F["Frame Processing"]
+    F --> G["Victim Search"]
+    F --> H["Staff Attendance"]
+    F --> I["Threat Detection"]
+    G --> J["Face Recognition"]
+    H --> J
+    I --> K["CV Heuristics"]
+    J --> L{"Known match?"}
+    L -->|"Yes"| M["Known Result"]
+    L -->|"No"| N["Unknown Re-ID"]
+    K --> O["Alert"]
+    M --> P["Event / Result"]
+    N --> P
+    O --> P
+    P --> Q["Local Data Store"]
+    Q --> R["Dashboard Review"]
+```
 
 ## **10.13 Level-1 Victim Search DFD** 
 
 For a more detailed representation of Victim Search, the process can be divided into smaller subprocesses. 
 
-P1 – Select Victim ↓ 
-
-P2 – Receive Camera Location 
-
-P3 – Acquire Frame ↓ 
-
-P4 – Detect Face ↓ 
-
-P5 – Generate Representation ↓ 
-
-P6 – Compare with Selected Victim ↓ 
-
-P7 – Calculate Distance ↓ 
-
-P8 – Apply Threshold ↓ ┌────┴─────┐ ↓          ↓ Match       No Match ↓          ↓ P9          Continue Victim Found ↓ P10 – Record Sighting ↓ 
-
-- P11 – Display Result 
+```mermaid
+flowchart TD
+    P1["P1: Select Victim"] --> P2["P2: Receive Camera Location"]
+    P2 --> P3["P3: Acquire Frame"]
+    P3 --> P4["P4: Detect Face"]
+    P4 --> P5["P5: Generate Representation"]
+    P5 --> P6["P6: Compare with Selected Victim"]
+    P6 --> P7["P7: Calculate Distance"]
+    P7 --> P8["P8: Apply Threshold"]
+    P8 --> D{"Match?"}
+    D -->|"Yes"| P9["P9: Victim Found"]
+    P9 --> P10["P10: Record Sighting"]
+    P10 --> P11["P11: Display Result"]
+    D -->|"No"| C["Continue Processing"]
+```
 
 This Level-1 representation shows that Victim Search is not simply a single recognition function. It is a sequence of input collection, target selection, visual processing, comparison, decision, logging, and presentation steps. 
 
@@ -7058,15 +7211,16 @@ An important characteristic of the N-ONE DFD is that processed information ultim
 
 The system does not represent the final action as an automatic real-world decision. 
 
-Instead: Camera Data ↓ Automated Processing ↓ Recognition / Alert ↓ 
+Instead: 
 
-Dashboard 
-
-↓ Human Review 
-
-- ↓ 
-
-Operator Decision 
+```mermaid
+flowchart TD
+    A["Camera Data"] --> B["Automated Processing"]
+    B --> C["Recognition / Alert"]
+    C --> D["Dashboard"]
+    D --> E["Human Review"]
+    E --> F["Operator Decision"]
+```
 
 This is particularly important for: 
 
@@ -7190,7 +7344,14 @@ The model helps explain how information generated during monitoring is associate
 
 The simplified relationship can be represented as: 
 
-User Session │ │ operates ↓ Camera Context │ │ provides context for ↓ Operational Event │ ├───────────────┐ ↓               ↓ Profile         Unknown Person │                  │ │                  │ ↓                  ↓ Victim            Unknown Sighting          Sighting 
+```mermaid
+flowchart TD
+    U["User Session"] -->|"operates"| C["Camera Context"]
+    C -->|"provides context for"| E["Operational Event"]
+    E --> P["Profile / Victim Sighting"]
+    E --> X["Unknown Person"]
+    X --> S["Unknown Sighting"]
+```
 
 Audit records provide a broader record of operational activity across these processes. 
 
@@ -7284,9 +7445,14 @@ A profile may have images corresponding to different capture angles.
 
 The logical structure can therefore be represented as: 
 
-Profile │ ├── Profile ID ├── Name ├── Category └── Image 
-
-└── Angle 
+```mermaid
+flowchart TD
+    P["Profile"] --> I["Profile ID"]
+    P --> N["Name"]
+    P --> C["Category"]
+    P --> M["Image"]
+    M --> A["Capture Angle"]
+```
 
 The model describes the logical relationship between a profile and its image information; it does not claim that these values are stored in a single database row. 
 
@@ -7337,13 +7503,23 @@ Location Camera/operator-entered location
 
 The relationship is: 
 
-Unknown Person │ │ has ↓ 
-
-Unknown Sighting │ ├── Sighting ID ├── Timestamp └── Location 
+```mermaid
+flowchart TD
+    U["Unknown Person"] -->|"has"| S["Unknown Sighting"]
+    S --> I["Sighting ID"]
+    S --> T["Timestamp"]
+    S --> L["Location"]
+```
 
 Conceptually, one Unknown Person can have multiple sightings: 
 
-unknown_001 │ ├── Sighting 001 ├── Sighting 002 ├── Sighting 003 └── Sighting 004 
+```mermaid
+flowchart LR
+    U["unknown_001"] --> S1["Sighting 001"]
+    U --> S2["Sighting 002"]
+    U --> S3["Sighting 003"]
+    U --> S4["Sighting 004"]
+```
 
 This structure supports the Unknown Re-ID workflow. 
 
@@ -7363,13 +7539,23 @@ Name Victim name Timestamp Time of observation Location Camera location
 
 A simplified relationship is: 
 
-Victim Profile │ │ detected in ↓ Victim Sighting │ ├── Timestamp └── Location 
+```mermaid
+flowchart TD
+    P["Victim Profile"] -->|"detected in"| S["Victim Sighting"]
+    S --> T["Timestamp"]
+    S --> L["Location"]
+```
 
 A single Victim profile can therefore have multiple recorded sightings. 
 
 For example: 
 
-Victim A │ ├── Location A / Time 1 ├── Location B / Time 2 └── Location C / Time 3 
+```mermaid
+flowchart LR
+    V["Victim A"] --> S1["Location A / Time 1"]
+    V --> S2["Location B / Time 2"]
+    V --> S3["Location C / Time 3"]
+```
 
 This allows the application to provide a location-aware history of Victim observations. 
 
@@ -7409,7 +7595,15 @@ Possible operational contexts include:
 
 The logical structure is: 
 
-Audit Record │ ├── Timestamp ├── Mode ├── Subject ID ├── Role ├── Event Type └── Details 
+```mermaid
+flowchart TD
+    A["Audit Record"] --> T["Timestamp"]
+    A --> M["Mode"]
+    A --> S["Subject ID"]
+    A --> R["Role"]
+    A --> E["Event Type"]
+    A --> D["Details"]
+```
 
 The audit record provides a broader event-oriented view than an individual Victim or Unknown sighting. 
 
@@ -7421,7 +7615,10 @@ Its primary logical purpose is to associate an observation with a meaningful loc
 
 For example: 
 
-Camera Context │ └── Location 
+```mermaid
+flowchart TD
+    C["Camera Context"] --> L["Location"]
+```
 
 The location can then be associated with: 
 
@@ -7663,7 +7860,12 @@ unknown_001 First seen: ... Last seen: ... Last location: ...
 
 ##### **Sighting level** 
 
-Sighting 1 → Time + Location Sighting 2 → Time + Location Sighting 3 → Time + Location 
+```mermaid
+flowchart LR
+    U["Unknown Person"] --> S1["Sighting 1<br/>Time + Location"]
+    U --> S2["Sighting 2<br/>Time + Location"]
+    U --> S3["Sighting 3<br/>Time + Location"]
+```
 
 ## **11.17 Audit Record Relationship** 
 
@@ -7685,11 +7887,17 @@ An audit event can logically reference:
 
 For example: 
 
-Operator │ ↓ Victim Search │ ↓ Victim Found │ ↓ 
-
-Audit Record 
-
-├── Timestamp ├── Mode ├── Subject ID ├── Role └── Details 
+```mermaid
+flowchart TD
+    O["Operator"] --> V["Victim Search"]
+    V --> F["Victim Found"]
+    F --> A["Audit Record"]
+    A --> T["Timestamp"]
+    A --> M["Mode"]
+    A --> S["Subject ID"]
+    A --> R["Role"]
+    A --> D["Details"]
+```
 
 Similarly, a possible threat event can be represented through the same broad audit concept. 
 
@@ -7805,7 +8013,20 @@ The major startup operations are:
 
 The simplified startup sequence is: 
 
-Application Start ↓ main() ↓ Initialize Directories ↓ Initialize Logs ↓ Set Session Defaults ↓ Load Authentication Configuration ↓ Authentication Check ↓ Authenticated? /       \ No         Yes ↓           ↓ Locked /     Load Known Login UI     Encodings ↓ Render Dashboard ↓ Analytics + Logs 
+```mermaid
+flowchart TD
+    A["Application Start"] --> B["main()"]
+    B --> C["Initialize Directories"]
+    C --> D["Initialize Logs"]
+    D --> E["Set Session Defaults"]
+    E --> F["Load Authentication Configuration"]
+    F --> G["Authentication Check"]
+    G --> H{"Authenticated?"}
+    H -->|"No"| I["Locked Login UI"]
+    H -->|"Yes"| J["Load Known Encodings"]
+    J --> K["Render Dashboard"]
+    K --> L["Analytics + Logs"]
+```
 
 If the required credentials are unavailable, the application does not proceed into normal authenticated operation. 
 
@@ -7825,7 +8046,19 @@ The application then compares the submitted values with the configured credentia
 
 The process can be represented as: 
 
-Username + Password ↓ Read configured credentials ↓ Compare credentials ↓ Valid? /       \ Yes        No ↓          ↓ Assign      Increment role        failure count ↓           ↓ Set        5 failures? authenticated     / \ ↓            No  Yes Rerun page       ↓    ↓ ↓          Continue 60-sec lock Role-based dashboard 
+```mermaid
+flowchart TD
+    A["Username + Password"] --> B["Read Configured Credentials"]
+    B --> C["Compare Credentials"]
+    C --> D{"Valid?"}
+    D -->|"Yes"| E["Assign Role"]
+    E --> F["Set Authenticated Session"]
+    F --> G["Role-Based Dashboard"]
+    D -->|"No"| H["Increment Failure Count"]
+    H --> I{"5 failures reached?"}
+    I -->|"No"| J["Rerun Login Page"]
+    I -->|"Yes"| K["60-Second Lockout"]
+```
 
 The two primary roles are: 
 
@@ -7875,11 +8108,12 @@ The user is then returned to the unauthenticated state and must authenticate aga
 
 The conceptual flow is: 
 
-Authenticated Session ↓ 
-
-Logout ↓ 
-
-Clear authentication and role state ↓ Unauthenticated UI 
+```mermaid
+flowchart TD
+    A["Authenticated Session"] --> B["Logout"]
+    B --> C["Clear Authentication and Role State"]
+    C --> D["Unauthenticated UI"]
+```
 
 ## **12.3 Profile Enrollment** 
 
@@ -7887,7 +8121,16 @@ Profile enrollment is the process through which an Administrator creates a regis
 
 The input can originate from an uploaded image or the guided multi-angle capture workflow. 
 
-The image-processing sequence begins by reading the registration image using Pillow. The image is then converted into the format required by the computer-vision backend. Registration Image ↓ Pillow ↓ Image Decode ↓ BGR Conversion ↓ Loaded Face Backend ↓ Face Detection 
+The image-processing sequence begins by reading the registration image using Pillow. The image is then converted into the format required by the computer-vision backend. 
+
+```mermaid
+flowchart TD
+    A["Registration Image"] --> B["Pillow"]
+    B --> C["Image Decode"]
+    C --> D["BGR Conversion"]
+    D --> E["Load Face Backend"]
+    E --> F["Face Detection"]
+```
 
 The backend then searches for face regions. 
 
@@ -7897,9 +8140,14 @@ The registration workflow requires **exactly one detected face** .
 
 The decision process is: 
 
-Face Detection ↓ Number of detected faces ↓ Exactly 1? /       \ No         Yes ↓           ↓ Reject      Continue registration ↓ 
-
-Validate face size 
+```mermaid
+flowchart TD
+    A["Face Detection"] --> B["Count Detected Faces"]
+    B --> C{"Exactly one face?"}
+    C -->|"No"| D["Reject Registration"]
+    C -->|"Yes"| E["Continue Registration"]
+    E --> F["Validate Face Size"]
+```
 
 This prevents a registration image containing multiple people from being directly used as an unambiguous profile reference. 
 
@@ -7909,7 +8157,13 @@ After successful validation, the detected face region is cropped.
 
 The crop receives approximately **25% padding** around the detected face region. 
 
-Original Image ↓ Face Region ↓ 25% Padding ↓ Face Crop ↓ Save Profile 
+```mermaid
+flowchart LR
+    A["Original Image"] --> B["Face Region"]
+    B --> C["Apply 25% Padding"]
+    C --> D["Face Crop"]
+    D --> E["Save Profile"]
+```
 
 The resulting image is stored in the registered-profile directory. 
 
@@ -7925,7 +8179,17 @@ Front Left Right Up Down
 
 The logical structure is: 
 
-Profile ID │ ┌───────────┼───────────┐ ↓           ↓           ↓ Front       Left        Right │           │           │ └───────────┼───────────┘ │ Up / Down │ ↓ Registered Profile 
+```mermaid
+flowchart TD
+    P["Profile ID"] --> F["Front"]
+    P --> L["Left"]
+    P --> R["Right"]
+    P --> U["Up / Down"]
+    F --> S["Registered Profile"]
+    L --> S
+    R --> S
+    U --> S
+```
 
 Existing angle files associated with the same profile ID can be replaced during an update. 
 
@@ -7951,9 +8215,15 @@ The operator then:
 
 The workflow can be represented as: 
 
-Operator ↓ 
-
-Select "Lost Person Search" ↓ Select Victim ↓ Enter Camera Location ↓ Select Source ↓ Start Surveillance ↓ Process Frames 
+```mermaid
+flowchart TD
+    A["Operator"] --> B["Select Lost Person Search"]
+    B --> C["Select Victim"]
+    C --> D["Enter Camera Location"]
+    D --> E["Select Source"]
+    E --> F["Start Surveillance"]
+    F --> G["Process Frames"]
+```
 
 ### **12.4.1 Stateful OpenCV Processing** 
 
@@ -7961,17 +8231,18 @@ In the stateful OpenCV path, frames are processed continuously by the applicatio
 
 The general process is: 
 
-Frame ↓ Face Detection ↓ Face Representation 
-
-↓ 
-
-Selected Victim Cache ↓ 
-
-Comparison ↓ 
-
-Distance ↓ Threshold ↓ 
-
-Match / No Match 
+```mermaid
+flowchart TD
+    A["Frame"] --> B["Face Detection"]
+    B --> C["Face Representation"]
+    C --> D["Selected Victim Cache"]
+    D --> E["Comparison"]
+    E --> F["Distance"]
+    F --> G["Threshold"]
+    G --> H{"Match?"}
+    H -->|"Yes"| I["Victim Match"]
+    H -->|"No"| J["No Match"]
+```
 
 The candidate cache is restricted to the selected Victim profile in the neural recognition path. 
 
@@ -8005,13 +8276,16 @@ The result is presented through a dedicated result card.
 
 The logical flow is: 
 
-Selected Victim ↓ Detected Face ↓ Embedding Comparison ↓ Distance ≤ Threshold ↓ 
-
-Victim Found ↓ 
-
-Create Event 
-
-↓ Store Sighting ↓ Display Result Card 
+```mermaid
+flowchart TD
+    A["Selected Victim"] --> B["Detected Face"]
+    B --> C["Embedding Comparison"]
+    C --> D["Distance <= Threshold"]
+    D --> E["Victim Found"]
+    E --> F["Create Event"]
+    F --> G["Store Sighting"]
+    G --> H["Display Result Card"]
+```
 
 ### **12.4.3 Victim Non-Match** 
 
@@ -8021,7 +8295,12 @@ This is important because a non-match must not be converted into a positive Vict
 
 Therefore: 
 
-Face ↓ Comparison ↓ Threshold Not Satisfied ↓ No Victim Match 
+```mermaid
+flowchart TD
+    A["Face"] --> B["Comparison"]
+    B --> C["Threshold Not Satisfied"]
+    C --> D["No Victim Match"]
+```
 
 The system continues processing subsequent frames. 
 
@@ -8035,11 +8314,16 @@ The Victim Search interface can indicate that face detection is occurring while 
 
 This creates an explicit safety boundary: 
 
-Victim Search ↓ 
-
-Neural Runtime Available? /            \ Yes             No ↓               ↓ Neural matching   OpenCV fallback ↓               ↓ 
-
-Threshold         Face detection / decision           fallback features ↓               ↓ Victim result     Identity matching requires neural runtime 
+```mermaid
+flowchart TD
+    A["Victim Search"] --> B{"Neural runtime available?"}
+    B -->|"Yes"| C["Neural Matching"]
+    C --> D["Threshold Decision"]
+    D --> E["Victim Result"]
+    B -->|"No"| F["OpenCV Fallback"]
+    F --> G["Face Detection / Fallback Features"]
+    G --> H["Identity Matching Requires Neural Runtime"]
+```
 
 This prevents unsupported Victim identity claims from being generated by the fallback path. 
 
@@ -8051,7 +8335,16 @@ In this mode, detected faces can be compared with the registered profiles availa
 
 The general process is: 
 
-Camera Frame ↓ Face Detection ↓ Face Representation ↓ Known Profile Cache ↓ Compare Candidates ↓ Match? /      \ Yes       No ↓         ↓ Known     Unknown Staff     Workflow Result 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["Face Detection"]
+    B --> C["Face Representation"]
+    C --> D["Known Profile Cache"]
+    D --> E["Compare Candidates"]
+    E --> F{"Match?"}
+    F -->|"Yes"| G["Known Staff Result"]
+    F -->|"No"| H["Unknown Workflow"]
+```
 
 If a registered Staff profile satisfies the configured matching condition, the corresponding known identity can be displayed. 
 
@@ -8061,7 +8354,15 @@ If no registered identity is found, the system proceeds to the Unknown Re-ID pro
 
 When no known Staff/profile match is obtained: 
 
-No Known Match ↓ Check Unknown Cache ↓ Existing Unknown? /          \ Yes           No ↓             ↓ Existing       Create Unknown ID     New ID ↓             ↓ Update         Save Crop History        + Metadata 
+```mermaid
+flowchart TD
+    A["No Known Match"] --> B["Check Unknown Cache"]
+    B --> C{"Existing Unknown?"}
+    C -->|"Yes"| D["Use Existing Unknown ID"]
+    C -->|"No"| E["Create Unknown ID"]
+    D --> F["Update Crop / History / Metadata"]
+    E --> F
+```
 
 This allows the attendance workflow to distinguish between: 
 
@@ -8099,7 +8400,14 @@ The stored unknown image can subsequently act as a reference representation for 
 
 The process is: 
 
-New Unknown ↓ Save Face Crop ↓ Create Representation ↓ Store Unknown Record ↓ Future Face ↓ Compare with Unknown Cache 
+```mermaid
+flowchart TD
+    A["New Unknown"] --> B["Save Face Crop"]
+    B --> C["Create Representation"]
+    C --> D["Store Unknown Record"]
+    E["Future Face"] --> F["Compare with Unknown Cache"]
+    D --> F
+```
 
 If a later face sufficiently matches an existing unknown representation, the system associates the observation with that existing unknown ID. 
 
@@ -8119,11 +8427,13 @@ A new sighting record can also be appended, subject to the implemented write-thr
 
 The simplified workflow is: 
 
-Existing Unknown Match ↓ Retrieve Unknown ID ↓ Update Last Timestamp ↓ Update Last Location 
-
-↓ 
-
-Append Sighting 
+```mermaid
+flowchart TD
+    A["Existing Unknown Match"] --> B["Retrieve Unknown ID"]
+    B --> C["Update Last Timestamp"]
+    C --> D["Update Last Location"]
+    D --> E["Append Sighting"]
+```
 
 The system therefore provides local observation continuity. 
 
@@ -8139,7 +8449,17 @@ This separation prevents face-recognition models from being incorrectly represen
 
 The threat-processing sequence is approximately: 
 
-Camera Frame ↓ check_weapon_contours() ↓ Edge Detection ↓ Contour Extraction ↓ Geometric Filtering ↓ Possible Weapon? ↓ Warm HSV Analysis ↓ Possible Fire? ↓ Alert Result 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["check_weapon_contours()"]
+    B --> C["Edge Detection"]
+    C --> D["Contour Extraction"]
+    D --> E["Geometric Filtering"]
+    E --> F{"Possible weapon?"}
+    F --> G["Warm HSV Analysis"]
+    G --> H{"Possible fire?"}
+    H --> I["Alert Result"]
+```
 
 ### **12.7.1 Contour-Based Analysis** 
 
@@ -8183,7 +8503,19 @@ Threat Detection does not use:
 
 The processing paths are therefore: 
 
-Camera Frame │ ┌─────────┴─────────┐ ↓                   ↓ Face Recognition      Threat Detection │                   │ Face Detection       Canny / Contours │                   │ Embedding             HSV Analysis │                   │ Distance              Heuristic │                   │ Known/Unknown        Possible Alert 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["Face Recognition"]
+    A --> C["Threat Detection"]
+    B --> D["Face Detection"]
+    D --> E["Embedding"]
+    E --> F["Distance"]
+    F --> G["Known / Unknown Result"]
+    C --> H["Canny / Contours"]
+    H --> I["HSV Analysis"]
+    I --> J["Heuristic"]
+    J --> K["Possible Alert"]
+```
 
 ## **12.8 Browser WebRTC Path** 
 
@@ -8193,7 +8525,15 @@ This path differs from the stateful OpenCV loop in how frame processing communic
 
 The browser camera provides frames to a worker-thread processor. 
 
-Browser Camera ↓ WebRTC ↓ Worker-Thread Processor ↓ Frame Annotation ↓ Protected Status Object ↓ Streamlit UI Polling ↓ Display Result 
+```mermaid
+flowchart TD
+    A["Browser Camera"] --> B["WebRTC"]
+    B --> C["Worker-Thread Processor"]
+    C --> D["Frame Annotation"]
+    D --> E["Protected Status Object"]
+    E --> F["Streamlit UI Polling"]
+    F --> G["Display Result"]
+```
 
 ### **12.8.1 Worker-Thread Processing** 
 
@@ -8219,23 +8559,13 @@ The Streamlit UI then polls this status information and updates the visible inte
 
 The architecture can therefore be represented as: 
 
-WebRTC Worker 
-
-↓ 
-
-Process Frame 
-
-↓ 
-
-Update Protected Status 
-
-↓ 
-
-Streamlit UI Polling 
-
-↓ 
-
-Update Visible Result 
+```mermaid
+flowchart TD
+    A["WebRTC Worker"] --> B["Process Frame"]
+    B --> C["Update Protected Status"]
+    C --> D["Streamlit UI Polling"]
+    D --> E["Update Visible Result"]
+```
 
 This differs from the stateful OpenCV loop, where processing and application state handling occur within the main application workflow. 
 
@@ -8245,11 +8575,10 @@ Because the two camera paths do not operate identically, an academic demonstrati
 
 For example: 
 
-OpenCV path → stateful processing + local logging 
-
-WebRTC path 
-
-→ worker-thread annotation + UI polling 
+| **Processing path** | **Behavior** |
+|---|---|
+| OpenCV | Stateful processing + local logging |
+| WebRTC | Worker-thread annotation + UI polling |
 
 This distinction avoids presenting the two paths as technically identical. 
 
@@ -8283,9 +8612,11 @@ The application handles conditions including:
 
 If the required authentication credentials are missing, the application does not allow normal dashboard access. 
 
-Credentials Missing ↓ Configuration Error ↓ 
-
-Dashboard Remains Locked 
+```mermaid
+flowchart TD
+    A["Credentials Missing"] --> B["Configuration Error"]
+    B --> C["Dashboard Remains Locked"]
+```
 
 This is preferable to silently operating with undefined authentication configuration. 
 
@@ -8295,7 +8626,13 @@ If an uploaded image cannot be decoded or processed, the registration process re
 
 Similarly, images containing zero or multiple detected faces do not satisfy the normal single-face enrollment condition. 
 
-Uploaded Image ↓ Decode ↓ Valid? /    \ No      Yes ↓        ↓ Error   Face Detection 
+```mermaid
+flowchart TD
+    A["Uploaded Image"] --> B["Decode"]
+    B --> C{"Valid image?"}
+    C -->|"No"| D["Report Error"]
+    C -->|"Yes"| E["Face Detection"]
+```
 
 ### **12.9.3 Camera Errors** 
 
@@ -8359,7 +8696,30 @@ Therefore, the report distinguishes between an **implemented interface/hook** an
 
 The complete N-ONE operational workflow can be summarized as: 
 
-START ↓ Initialize Application ↓ Authentication / RBAC ↓ Role Identified ↓ Dashboard ↓ Select Operational Mode ↓ Select Data Source ↓ Frames ↓ ┌─────────┼────────────┐ ↓         ↓            ↓ Victim      Staff       Threat Search      /Attend.    Detection ↓         ↓            ↓ Face        Face         CV Heuristic Processing  Processing   Processing ↓         ↓            ↓ Target      Known/       Possible Match       Unknown      Alert ↓         ↓            ↓ Victim      Unknown      Alert/ Found       Re-ID        Log │         │            │ └─────────┼────────────┘ ↓ Local Storage ↓ Dashboard Review ↓ Human Review 
+```mermaid
+flowchart TD
+    A["Start"] --> B["Initialize Application"]
+    B --> C["Authentication / RBAC"]
+    C --> D["Role Identified"]
+    D --> E["Dashboard"]
+    E --> F["Select Operational Mode"]
+    F --> G["Select Data Source"]
+    G --> H["Acquire Frames"]
+    H --> I["Victim Search"]
+    H --> J["Staff / Attendance"]
+    H --> K["Threat Detection"]
+    I --> L["Face Processing / Target Match"]
+    J --> M["Face Processing / Known or Unknown"]
+    K --> N["CV Heuristic / Possible Alert"]
+    L --> O["Victim Found or No Match"]
+    M --> P["Unknown Re-ID"]
+    N --> Q["Alert Log"]
+    O --> R["Local Storage"]
+    P --> R
+    Q --> R
+    R --> S["Dashboard Review"]
+    S --> T["Human Review"]
+```
 
 This workflow demonstrates that N-ONE is not simply a face-recognition program. It is an integrated application containing several processing modes and supporting data-management functions. 
 
@@ -8367,14 +8727,11 @@ This workflow demonstrates that N-ONE is not simply a face-recognition program. 
 
 The three major operational paths can be summarized as follows: 
 
-|**Mode**|**Primary Input**|**Main Processing**|**Main Output**|
+| **Mode** | **Primary input** | **Main processing** | **Main output** |
 |---|---|---|---|
-|Victim Search|Camera/video|Target-restricted face|Victim Found / No|
-||frame|comparison|Match|
-|Staff/|Camera/video|Known-profile recognition +|Known/Unknown|
-|Attendance|frame|Unknown Re-ID|status|
-|Threat|Camera/video|Contour + HSV heuristics|Possible weapon/fire|
-|Detection|frame||alert|
+| Victim Search | Camera/video frame | Target-restricted face comparison | Victim Found / No Match |
+| Staff / Attendance | Camera/video frame | Known-profile recognition + Unknown Re-ID | Known/Unknown status |
+| Threat Detection | Camera/video frame | Contour + HSV heuristics | Possible weapon/fire alert |
 
 
 
@@ -8530,11 +8887,16 @@ The function therefore does not generate a default username or password when the
 
 #### **Authentication configuration flow** 
 
-Requested Secret ↓ Environment Variable 
-
-↓ 
-
-Available? /       \ Yes        No ↓          ↓ Return     Streamlit Value      Secrets ↓ Available? /       \ Yes        No ↓          ↓ Return      Return Value        None 
+```mermaid
+flowchart TD
+    A["Requested Secret"] --> B["Environment Variable"]
+    B --> C{"Available?"}
+    C -->|"Yes"| D["Return Value"]
+    C -->|"No"| E["Streamlit Secrets"]
+    E --> F{"Available?"}
+    F -->|"Yes"| G["Return Value"]
+    F -->|"No"| H["Return None"]
+```
 
 The higher-level load_auth_credentials() function validates that the required Administrator and Operator credentials are actually present. 
 
@@ -8574,7 +8936,12 @@ The two representations must have compatible dimensions.
 
 The implementation checks: if probe.shape != reference.shape: raise ValueError("Face embedding dimensions do not match") Without this check, the application could attempt to compare incompatible vectors. 
 
-For example: Reference → [x1, x2, x3, ...] Probe     → [y1, y2, y3, ...] 
+For example: 
+
+```text
+Reference: [x1, x2, x3, ...]
+Probe:     [y1, y2, y3, ...]
+```
 
 The dimensions must correspond before a direct distance calculation is performed. 
 
@@ -8632,9 +8999,13 @@ The resulting distance is subsequently evaluated against the configured matching
 
 Conceptually: 
 
-Face Representation ↓ Distance Calculation ↓ Distance ≤ Threshold? 
-
-/        \ Yes         No ↓           ↓ Potential      No Match Match 
+```mermaid
+flowchart TD
+    A["Face Representation"] --> B["Distance Calculation"]
+    B --> C{"Distance <= Threshold?"}
+    C -->|"Yes"| D["Potential Match"]
+    C -->|"No"| E["No Match"]
+```
 
 The current source configuration uses a default threshold of 0.40 for the relevant recognition configuration. 
 
@@ -8660,9 +9031,17 @@ The second restricts the search to the Victim category.
 
 The logical flow is: 
 
-Operator selects Victim ↓ target_profile_id ↓ Victim candidate restriction ↓ Face representation ↓ Distance comparison ↓ Threshold ↓ 
-
-Match / No Match 
+```mermaid
+flowchart TD
+    A["Operator selects Victim"] --> B["target_profile_id"]
+    B --> C["Restrict candidate: role = Victim"]
+    C --> D["Face Representation"]
+    D --> E["Distance Comparison"]
+    E --> F["Threshold"]
+    F --> G{"Match?"}
+    G -->|"Yes"| H["Selected Victim"]
+    G -->|"No"| I["No Match"]
+```
 
 This differs from unrestricted attendance recognition, where the known cache can contain multiple registered profiles. 
 
@@ -8676,9 +9055,12 @@ During a search for Victim_A, the target-restricted branch is intended to evalua
 
 The logical candidate set is therefore: 
 
-All Registered Profiles ↓ 
-
-Role = Victim ↓ Profile ID = Selected Victim ↓ Target Candidate 
+```mermaid
+flowchart TD
+    A["All Registered Profiles"] --> B["Filter: role = Victim"]
+    B --> C["Filter: profile ID = selected Victim"]
+    C --> D["Target Candidate"]
+```
 
 This is one of the important implementation safeguards in the Victim Search workflow. 
 
@@ -8724,7 +9106,18 @@ The processing can then continue to the crop-size check, padding operation, and 
 
 The broader registration flow is: 
 
-Input Image ↓ Decode ↓ Face Detection ↓ Exactly One Face ↓ Minimum Face Size ↓ Face Crop ↓ 25% Padding ↓ Generate/Update Profile ID ↓ Save Profile Image 
+```mermaid
+flowchart TD
+    A["Input Image"] --> B["Decode"]
+    B --> C["Face Detection"]
+    C --> D{"Exactly one face?"}
+    D -->|"No"| E["Reject Registration"]
+    D -->|"Yes"| F["Minimum Face Size Check"]
+    F --> G["Face Crop"]
+    G --> H["Apply 25% Padding"]
+    H --> I["Generate / Update Profile ID"]
+    I --> J["Save Profile Image"]
+```
 
 This validation is particularly important for maintaining controlled enrollment data. 
 
@@ -8792,7 +9185,14 @@ Therefore, the report must retain the word **Possible** when describing this out
 
 The processing is better understood as: 
 
-Visual Pattern ↓ Geometric Heuristic ↓ Possible Weapon Alert ↓ Human Review rather than: Object ↓ AI Weapon Classifier ↓ Confirmed Weapon 
+```mermaid
+flowchart LR
+    A["Visual Pattern"] --> B["Geometric Heuristic"]
+    B --> C["Possible Weapon Alert"]
+    C --> D["Human Review"]
+    N["Object"] -. "not implemented in this prototype" .-> M["AI Weapon Classifier"]
+    M -.-> X["Confirmed Weapon"]
+```
 
 ## **13.6 Unknown Registration** 
 
@@ -8802,9 +9202,16 @@ The register_new_unknown() operation performs several related tasks.
 
 Conceptually: 
 
-New Unknown Face ↓ Generate Sequential ID ↓ Save Face Crop ↓ 
+```mermaid
+flowchart TD
+    A["New Unknown Face"] --> B["Generate Sequential ID"]
+    B --> C["Save Face Crop"]
+    C --> D["Add Unknown Database Row"]
+    D --> E["Add First Sighting"]
+    E --> F["Write Audit Event"]
+```
 
-Add Unknown Database Row ↓ Add First Sighting ↓ Write Audit Event An identifier may take the form: 
+An identifier may take the form: 
 
 unknown_001 unknown_002 unknown_003 
 
@@ -8840,7 +9247,15 @@ When a later observation is associated with an existing unknown ID, update_unkno
 
 The logical sequence is: 
 
-Detected Face ↓ Unknown Cache Comparison ↓ Existing Unknown Match ↓ Retrieve Unknown ID ↓ Update Last Timestamp ↓ Update Last Location ↓ Append Sighting Record 
+```mermaid
+flowchart TD
+    A["Detected Face"] --> B["Unknown Cache Comparison"]
+    B --> C["Existing Unknown Match"]
+    C --> D["Retrieve Unknown ID"]
+    D --> E["Update Last Timestamp"]
+    E --> F["Update Last Location"]
+    F --> G["Append Sighting Record"]
+```
 
 A short duplicate-write interval is applied to reduce unnecessary repeated records for the same ID/location combination. 
 
@@ -8867,7 +9282,20 @@ This mapping demonstrates that the code is not presented as isolated snippets; e
 
 The important recognition functions can be conceptually combined as follows: 
 
-Camera Frame ↓ detect_face_regions() ↓ Face Region ↓ Face Representation ↓ find_face_in_known_cache() ↓ calculate_face_distance() ↓ Threshold Comparison ↓ Known / No Match For Victim Search, the matching call additionally receives: profile_id = target_profile_id role       = "Victim" 
+```mermaid
+flowchart TD
+    A["Camera Frame"] --> B["detect_face_regions()"]
+    B --> C["Face Region"]
+    C --> D["Face Representation"]
+    D --> E["find_face_in_known_cache()"]
+    E --> F["calculate_face_distance()"]
+    F --> G["Threshold Comparison"]
+    G --> H{"Match?"}
+    H -->|"Yes"| I["Known Identity"]
+    H -->|"No"| J["Unknown Workflow"]
+```
+
+For Victim Search, the matching call additionally receives `profile_id = target_profile_id` and `role = "Victim"`. 
 
 This creates the target-restricted behavior described in Chapter 12. 
 
@@ -8875,7 +9303,17 @@ This creates the target-restricted behavior described in Chapter 12.
 
 The registration-related code can similarly be represented as: 
 
-Uploaded / Captured Image ↓ Image Decode ↓ detect_face_regions() ↓ Face Count /       \ 0        >1 ↓         ↓ Reject     Reject \       / \     / Exactly 1 ↓ Size Check ↓ Face Crop ↓ Padding ↓ Save Profile 
+```mermaid
+flowchart TD
+    A["Uploaded / Captured Image"] --> B["Image Decode"]
+    B --> C["detect_face_regions()"]
+    C --> D{"Face count?"}
+    D -->|"0 or >1"| E["Reject"]
+    D -->|"Exactly 1"| F["Size Check"]
+    F --> G["Face Crop"]
+    G --> H["Padding"]
+    H --> I["Save Profile"]
+```
 
 This demonstrates how source-level validation corresponds to the application's functional requirement of controlled enrollment. 
 
@@ -8887,11 +9325,27 @@ The monolithic structure has an important advantage for a university prototype: 
 
 The simplified architecture is: 
 
-┌────────────────────────────────────┐ │              app.py                │ │                                    │ │ Authentication                     │ │ Registration                       │ │ Camera Processing                  │ 
-
-│ Face Recognition                   │ │ Victim Search                      │ │ Unknown Re-ID                      │ │ Threat Detection                   │ │ Dashboard                          │ │ Logging                            │ └───────────────┬────────────────────┘ ↓ 
-
-Local Files / CSV 
+```mermaid
+flowchart TD
+    A["app.py"] --> B["Authentication"]
+    A --> C["Registration"]
+    A --> D["Camera Processing"]
+    A --> E["Face Recognition"]
+    A --> F["Victim Search"]
+    A --> G["Unknown Re-ID"]
+    A --> H["Threat Detection"]
+    A --> I["Dashboard"]
+    A --> J["Logging"]
+    B --> K["Local Files / CSV"]
+    C --> K
+    D --> K
+    E --> K
+    F --> K
+    G --> K
+    H --> K
+    I --> K
+    J --> K
+```
 
 This is straightforward to run and understand, but it also concentrates several responsibilities in one application module. 
 
@@ -8917,9 +9371,11 @@ Direct CSV writes can create concurrency problems when multiple processes or wor
 
 For example: 
 
-Worker A ──┐ ├──→ CSV file 
-
-Worker B ──┘ 
+```mermaid
+flowchart LR
+    A["Worker A"] --> C["Shared CSV File"]
+    B["Worker B"] --> C
+```
 
 Without a database transaction or explicit file-locking architecture, concurrent writes can potentially create consistency problems. 
 
@@ -9332,7 +9788,11 @@ However, when the threshold was relaxed, the observed false-positive behavior ch
 
 For example, FaceNet recorded: 
 
-Threshold 0.50 → 1 FP Threshold 0.55 → 1 FP Threshold 0.60 → 2 FP 
+| **Threshold** | **False positives** |
+|---:|---:|
+| 0.50 | 1 |
+| 0.55 | 1 |
+| 0.60 | 2 |
 
 This demonstrates the practical trade-off between threshold strictness and false acceptance. 
 
@@ -9340,19 +9800,15 @@ This demonstrates the practical trade-off between threshold strictness and false
 
 The general relationship can be represented as: 
 
-Lower Threshold ↓ More restrictive acceptance ↓ Potentially fewer false accepts ↓ Potentially more false rejects 
-
-Higher Threshold 
-
-↓ 
-
-Less restrictive acceptance 
-
-↓ 
-
-Potentially more genuine accepts ↓ 
-
-Potentially more false accepts 
+```mermaid
+flowchart TD
+    A["Lower Threshold"] --> B["More Restrictive Acceptance"]
+    B --> C["Potentially Fewer False Accepts"]
+    B --> D["Potentially More False Rejects"]
+    E["Higher Threshold"] --> F["Less Restrictive Acceptance"]
+    F --> G["Potentially More Genuine Accepts"]
+    F --> H["Potentially More False Accepts"]
+```
 
 The exact behavior is model-specific and must be measured rather than assumed. 
 
@@ -9580,9 +10036,13 @@ The latter would require much broader evidence than the current dataset provides
 
 The benchmark also demonstrates that the system does not accept every genuine Victim test image. At threshold 0.40: 
 
-FaceNet    → 11 FN FaceNet512 → 10 FN ArcFace    → 9 FN 
-
 Therefore, the benchmark contains genuine appearances that were rejected by the recognition threshold. 
+
+| **Model** | **False negatives** |
+|---|---:|
+| FaceNet | 11 |
+| FaceNet512 | 10 |
+| ArcFace | 9 |
 
 This can occur because face-recognition performance is affected by factors such as: 
 
@@ -9798,9 +10258,17 @@ The N-ONE testing strategy is designed around the major functional boundaries of
 
 The overall approach can be represented as: 
 
-N-ONE Testing | ----------------------------------------|           |            |               | v           v            v               v Functional   Boundary     Data/State      AI Evaluation Tests        Tests        Tests             Tests |           |            |               | v           v            v               v 
-
-Authentication  Invalid      CSV/Data       Model Comparison Profiles        Inputs       Unknown DB      Thresholds Victim Search   Face Count   Victim Cache    Dataset Metadata Browser         Paths        Logs             Metrics 
+```mermaid
+flowchart TD
+    A["N-ONE Testing"] --> B["Functional Tests"]
+    A --> C["Boundary Tests"]
+    A --> D["Data / State Tests"]
+    A --> E["AI Evaluation Tests"]
+    B --> B1["Authentication / Profiles / Victim Search / Browser"]
+    C --> C1["Invalid Inputs / Face Count / Paths"]
+    D --> D1["CSV / Unknown DB / Cache / Logs"]
+    E --> E1["Model Comparison / Thresholds / Metadata / Metrics"]
+```
 
 The tests are primarily designed to answer questions such as: 
 
@@ -9838,11 +10306,15 @@ Similarly, Victim filtering can be tested independently of the complete camera-p
 
 This approach is useful because the N-ONE application contains several operations that can be validated independently: 
 
-Profile Naming ↓ 
-
-Category Detection ↓ Known-Profile Cache ↓ Victim Filtering ↓ Recognition Decision ↓ Result Annotation ↓ 
-
-Logging 
+```mermaid
+flowchart TD
+    A["Profile Naming"] --> B["Category Detection"]
+    B --> C["Known-Profile Cache"]
+    C --> D["Victim Filtering"]
+    D --> E["Recognition Decision"]
+    E --> F["Result Annotation"]
+    F --> G["Logging"]
+```
 
 Testing each boundary independently helps identify whether an error originates from: 
 
@@ -9898,15 +10370,12 @@ Instead, the system should remain unavailable for authenticated operation and re
 
 The relevant implementation boundary is: 
 
-_read_secret() 
-
-↓ 
-
-load_auth_credentials() ↓ Validate configuration 
-
-↓ 
-
-Authentication available 
+```mermaid
+flowchart TD
+    A["_read_secret()"] --> B["load_auth_credentials()"]
+    B --> C["Validate Configuration"]
+    C --> D["Authentication Available"]
+```
 
 This test is important from both a functional and security perspective because missing authentication configuration should not result in unintended access. 
 
@@ -9988,7 +10457,15 @@ The expected behavior includes resetting the relevant:
 
 Conceptually: 
 
-Clear Unknown Data | +---- Remove unknown images | +---- Reset unknown cache | +---- Reset CSV tracking | +---- Refresh application state 
+```mermaid
+flowchart TD
+    A["Clear Unknown Data"] --> B["Remove Unknown Images"]
+    A --> C["Reset Unknown Cache"]
+    A --> D["Reset CSV Tracking"]
+    B --> E["Refresh Application State"]
+    C --> E
+    D --> E
+```
 
 This test is important because incomplete cleanup could cause an old unknown identity to reappear after the operator believes the data has been cleared. 
 
@@ -10002,7 +10479,13 @@ The operator selects one Victim profile, and the recognition cache used by the s
 
 The expected behavior is: 
 
-Selected Victim | v Target Profile ID | v Filtered Known Cache | v Face Comparison | v Selected Victim / No Match 
+```mermaid
+flowchart TD
+    A["Selected Victim"] --> B["Target Profile ID"]
+    B --> C["Filtered Known Cache"]
+    C --> D["Face Comparison"]
+    D --> E["Selected Victim / No Match"]
+```
 
 The important security and functional property is that another registered Victim or Staff member should not accidentally become the visible result of the selected Victim search. 
 
@@ -10028,13 +10511,12 @@ These representations can provide more variation during later recognition.
 
 The test therefore validates the connection between: 
 
-Saved Profile Images ↓ 
-
-Profile Inventory ↓ 
-
-Known Face Database Refresh ↓ 
-
-Recognition Cache 
+```mermaid
+flowchart TD
+    A["Saved Profile Images"] --> B["Profile Inventory"]
+    B --> C["Known Face Database Refresh"]
+    C --> D["Recognition Cache"]
+```
 
 If an angle is saved successfully but omitted from the recognition cache, the enrollment workflow would appear to work while the actual recognition system would not benefit from that image. 
 
@@ -10060,9 +10542,12 @@ When a detected face does not match the selected Victim, the browser annotation 
 
 The expected behavior is: 
 
-Face detected ↓ No selected-Victim match ↓ Green detection box ↓ 
-
-No Victim identity label 
+```mermaid
+flowchart TD
+    A["Face Detected"] --> B["No Selected-Victim Match"]
+    B --> C["Green Detection Box"]
+    C --> D["No Victim Identity Label"]
+```
 
 The purpose is to prevent the interface from displaying a misleading identity simply because a face was detected. 
 
@@ -10074,9 +10559,12 @@ When the neural recognition runtime is available and the selected Victim is corr
 
 The expected behavior is represented as: 
 
-Face detected ↓ Neural recognition ↓ Selected Victim matched ↓ 
-
-Red selected-Victim result 
+```mermaid
+flowchart TD
+    A["Face Detected"] --> B["Neural Recognition"]
+    B --> C["Selected Victim Matched"]
+    C --> D["Red Selected-Victim Result"]
+```
 
 The test therefore validates the relationship between the recognition result and its visual representation. 
 
@@ -10092,9 +10580,12 @@ The test therefore verifies that the fallback Victim path does not falsely label
 
 Conceptually: 
 
-Neural runtime unavailable ↓ OpenCV fallback ↓ Face detection / processing ↓ 
-
-No unsupported identity assignment 
+```mermaid
+flowchart TD
+    A["Neural Runtime Unavailable"] --> B["OpenCV Fallback"]
+    B --> C["Face Detection / Processing"]
+    C --> D["No Unsupported Identity Assignment"]
+```
 
 This is an important safety boundary because a lightweight fallback detector should not be treated as equivalent to a neural identity-recognition model. 
 
@@ -10108,9 +10599,14 @@ Because filesystem paths can potentially contain traversal sequences, the collec
 
 Conceptually: 
 
-User Input Path ↓ Path Resolution ↓ Dataset Root Validation ↓ Allowed? 
-
-/       \ Yes        No |          | Save       Reject 
+```mermaid
+flowchart TD
+    A["User Input Path"] --> B["Path Resolution"]
+    B --> C["Dataset Root Validation"]
+    C --> D{"Allowed?"}
+    D -->|"Yes"| E["Save"]
+    D -->|"No"| F["Reject"]
+```
 
 The expected result is that a malicious or malformed path cannot cause files to be written outside the evaluation dataset directory. 
 
@@ -10136,11 +10632,13 @@ and:
 
 The reason is that an enrollment image must have an unambiguous identity association. The intended flow is: 
 
-Enrollment Image 
-
-↓ Face Detection ↓ 
-
-Count Faces | +---+---+ |       | 1     0 / >1 |       | Accept    Reject 
+```mermaid
+flowchart TD
+    A["Enrollment Image"] --> B["Face Detection"]
+    B --> C{"Exactly one face?"}
+    C -->|"Yes"| D["Accept"]
+    C -->|"No: 0 or more than 1"| E["Reject"]
+```
 
 This reduces the possibility of accidentally enrolling the wrong person's face. 
 
@@ -10216,9 +10714,13 @@ The system should not evaluate a model using the same image that was used to cre
 
 The conceptual workflow is: 
 
-Enrollment Dataset | v Create Reference | X | X  Same image must not be reused | v Independent Test Dataset | v 
-
-Recognition Evaluation 
+```mermaid
+flowchart TD
+    A["Enrollment Dataset"] --> B["Create Reference"]
+    B --> C["Independent Test Dataset"]
+    C --> D["Recognition Evaluation"]
+    A -. "do not reuse the same image" .-> C
+```
 
 This is necessary to reduce the risk of an artificially inflated result caused by testing memorized or identical images. 
 
@@ -10262,7 +10764,13 @@ Hash values can additionally help establish that a particular file has not silen
 
 Conceptually: 
 
-Source Image ↓ Dataset File ↓ SHA-256 Hash ↓ Metadata ↓ Benchmark 
+```mermaid
+flowchart TD
+    A["Source Image"] --> B["Dataset File"]
+    B --> C["SHA-256 Hash"]
+    C --> D["Metadata"]
+    D --> E["Benchmark"]
+```
 
 This improves reproducibility of the evaluation workspace. 
 
@@ -10270,18 +10778,16 @@ This improves reproducibility of the evaluation workspace.
 
 The current testing architecture can be divided into several layers. 
 
-**Testing Layer Main Purpose** 
-
-Unit/behavior testing Validate individual functions and behaviors 
-
-|Boundary testing|Validate invalid or unusual inputs|
+| **Testing layer** | **Main purpose** |
 |---|---|
-|Data testing|Validate CSV/cache/storage behavior|
-|Victim safety testing|Prevent incorrect identity assignment|
-|Browser annotation testing|Validate visual recognition states|
-|Collector testing|Validate evaluation dataset creation|
-|Benchmark testing|Compare AI models and thresholds|
-|Manual application testing|Validate complete operational workflow|
+| Unit/behavior testing | Validate individual functions and behaviors |
+| Boundary testing | Validate invalid or unusual inputs |
+| Data testing | Validate CSV/cache/storage behavior |
+| Victim safety testing | Prevent incorrect identity assignment |
+| Browser annotation testing | Validate visual recognition states |
+| Collector testing | Validate evaluation dataset creation |
+| Benchmark testing | Compare AI models and thresholds |
+| Manual application testing | Validate complete operational workflow |
 
 
 
@@ -10297,19 +10803,15 @@ The following gaps remain explicitly identified.
 
 A complete automated browser test covering: 
 
-Login 
-
-- → Profile Registration 
-
-- → Camera 
-
-- → Victim Search 
-
-- → Result 
-
-- → Logging 
-
-- → Logout 
+```mermaid
+flowchart LR
+    A["Login"] --> B["Profile Registration"]
+    B --> C["Camera"]
+    C --> D["Victim Search"]
+    D --> E["Result"]
+    E --> F["Logging"]
+    F --> G["Logout"]
+```
 
 is not currently available. 
 
@@ -10411,11 +10913,11 @@ Therefore, there is a schema-order inconsistency between the test expectation an
 
 The identified issue can be represented as: 
 
-Test Expectation 
-
-| v file_path first | X | v Checked-in Collector | v 
-
-id first 
+```mermaid
+flowchart LR
+    A["Test expectation: file_path first"] --> B["Schema order mismatch"]
+    B --> C["Checked-in collector: id first"]
+```
 
 The problem concerns the expected order of metadata columns rather than necessarily indicating that the data itself is semantically incorrect. 
 
@@ -10517,47 +11019,20 @@ This classification prevents historical results from being incorrectly presented
 
 Before final submission, the testing process should ideally follow: 
 
-1. Prepare clean test environment 
-
-- ↓ 
-
-2. Install required dependencies ↓ 
-
-3. Verify pytest availability 
-
-- ↓ 
-
-4. Run complete automated suite 
-
-- ↓ 
-
-5. Capture terminal output 
-
-- ↓ 
-
-6. Investigate failures/errors 
-
-- ↓ 
-
-7. Re-run after corrections 
-
-- ↓ 
-
-8. Validate evaluation metadata 
-
-↓ 
-
-9. Validate benchmark CSVs ↓ 
-
-10. Run manual application checks 
-
-- ↓ 
-
-11. Capture screenshots 
-
-- ↓ 
-
-12. Record final evidence 
+```mermaid
+flowchart TD
+    A["Prepare Clean Test Environment"] --> B["Install Required Dependencies"]
+    B --> C["Verify pytest Availability"]
+    C --> D["Run Complete Automated Suite"]
+    D --> E["Capture Terminal Output"]
+    E --> F["Investigate Failures / Errors"]
+    F --> G["Re-run After Corrections"]
+    G --> H["Validate Evaluation Metadata"]
+    H --> I["Validate Benchmark CSVs"]
+    I --> J["Run Manual Application Checks"]
+    J --> K["Capture Screenshots"]
+    K --> L["Record Final Evidence"]
+```
 
 The final report should only state **“all tests passed”** if the complete suite has actually been executed successfully in the documented environment. 
 
@@ -10717,9 +11192,18 @@ The application does not intentionally provide unrestricted access to the main o
 
 The basic security flow can be represented as: 
 
-User | v Enter Credentials | v Credential Configuration | v Credential Comparison | +------------------+ |                  | Valid             Invalid |                  | v                  v Authenticated     Failure Count |                  | v                  v Role Assigned     Lockout Check |                  | v                  v 
-
-Admin / Operator  Temporary Lock 
+```mermaid
+flowchart TD
+    A["User"] --> B["Enter Credentials"]
+    B --> C["Credential Configuration"]
+    C --> D["Credential Comparison"]
+    D --> E{"Valid?"}
+    E -->|"Yes"| F["Authenticated"]
+    F --> G["Role Assigned: Admin / Operator"]
+    E -->|"No"| H["Failure Count"]
+    H --> I["Lockout Check"]
+    I --> J["Retry or Temporary Lock"]
+```
 
 This provides an initial access-control boundary before users can access the system's operational features. 
 
@@ -10751,19 +11235,11 @@ The purpose of using a constant-time comparison primitive is to avoid relying on
 
 The relevant security principle is: 
 
-Credential Input 
-
-| 
-
-v 
-
-Secure Comparison 
-
-| 
-
-v 
-
-Authentication Decision 
+```mermaid
+flowchart TD
+    A["Credential Input"] --> B["Secure Comparison"]
+    B --> C["Authentication Decision"]
+```
 
 This does not mean that the entire authentication system is equivalent to a complete enterprise identity-management solution. It represents a specific protective measure within the application's local authentication mechanism. 
 
@@ -10777,9 +11253,15 @@ Maximum Failed Attempts = 5 Lockout Period = 60 seconds
 
 The conceptual workflow is: 
 
-Login Attempt | v Credentials Valid? /          \ Yes           No |              | v              v Login       Increment Failure Count | v Attempts >= 5? /       \ No         Yes |           | v           v 
-
-Allow retry   60-sec lockout 
+```mermaid
+flowchart TD
+    A["Login Attempt"] --> B{"Credentials valid?"}
+    B -->|"Yes"| C["Login"]
+    B -->|"No"| D["Increment Failure Count"]
+    D --> E{"Attempts >= 5?"}
+    E -->|"No"| F["Allow Retry"]
+    E -->|"Yes"| G["60-Second Lockout"]
+```
 
 This provides basic protection against repeated password guessing within the current application session. 
 
@@ -10799,9 +11281,13 @@ The purpose of this separation is to prevent every authenticated user from autom
 
 The conceptual access structure is: 
 
-Authenticated User 
-
-| +------+------+ |             | v             v Administrator   Operator |             | v             v Administrative       Monitoring Controls          Operations 
+```mermaid
+flowchart TD
+    A["Authenticated User"] --> B["Administrator"]
+    A --> C["Operator"]
+    B --> D["Administrative Controls"]
+    C --> E["Monitoring Operations"]
+```
 
 ## **16.7 Administrator Privileges** 
 
@@ -10871,13 +11357,12 @@ Authentication credentials are expected to be supplied through environment varia
 
 The intended principle is: 
 
-Source Code 
-
-| X | Credentials | 
-
-+---- Environment Variables | 
-
-+---- Streamlit Secrets 
+```mermaid
+flowchart LR
+    A["Source Code"] -. "does not contain" .-> B["Credentials"]
+    B --> C["Environment Variables"]
+    B --> D["Streamlit Secrets"]
+```
 
 This separation reduces the risk of accidentally placing credentials directly in the project repository. 
 
@@ -10949,11 +11434,15 @@ These include:
 
 The data flow can be represented as: 
 
-Camera / Registration | v 
-
-Face/Image Processing 
-
-| +----------------+ |                | v                v Registered Data     Unknown Data |                | +-------+--------+ | v CSV / Image Files | v Dashboard / Review 
+```mermaid
+flowchart TD
+    A["Camera / Registration"] --> B["Face / Image Processing"]
+    B --> C["Registered Data"]
+    B --> D["Unknown Data"]
+    C --> E["CSV / Image Files"]
+    D --> E
+    E --> F["Dashboard / Review"]
+```
 
 ## **16.13 Local File Storage** 
 
@@ -11035,13 +11524,12 @@ Long-term storage of facial and location information may increase privacy exposu
 
 A future production deployment should define: 
 
-Data Created | v Retention Period | v 
-
-Review / Expiration | 
-
-v 
-
-Secure Deletion 
+```mermaid
+flowchart TD
+    A["Data Created"] --> B["Retention Period"]
+    B --> C["Review / Expiration"]
+    C --> D["Secure Deletion"]
+```
 
 The actual retention period should be determined according to the deployment's legitimate purpose and applicable requirements. 
 
@@ -11105,9 +11593,13 @@ Similarly, camera-location information should only be retained when it is requir
 
 A conceptual privacy-aware workflow is: 
 
-Collect Data 
-
-| v Purpose Check | v Necessary? /    \ Yes     No |       | v       v Store   Do Not Collect 
+```mermaid
+flowchart TD
+    A["Collect Data"] --> B["Purpose Check"]
+    B --> C{"Necessary?"}
+    C -->|"Yes"| D["Store"]
+    C -->|"No"| E["Do Not Collect"]
+```
 
 This reduces unnecessary exposure of personal information. 
 
@@ -11143,9 +11635,7 @@ d≤τd \leq \tau
 
 indicates that the candidate satisfies the configured matching rule. 
 
-However, this does **not** mean: 
-
-Distance = X ↓ Confidence = X% 
+However, this does **not** mean that a distance value $X$ corresponds to a confidence of $X\%$. 
 
 A raw cosine distance should not automatically be converted into a percentage certainty. 
 
@@ -11165,25 +11655,21 @@ Two important error types must be considered.
 
 An individual is incorrectly identified as the selected Victim. 
 
-Other Person 
-
-↓ 
-
-Incorrect Victim Match 
-
-↓ 
-
-False Positive 
+```mermaid
+flowchart TD
+    A["Other Person"] --> B["Incorrect Victim Match"]
+    B --> C["False Positive"]
+```
 
 #### **False Negative** 
 
 The actual Victim is present but the system fails to identify them. 
 
-Actual Victim 
-
-↓ No Match ↓ 
-
-False Negative 
+```mermaid
+flowchart TD
+    A["Actual Victim"] --> B["No Match"]
+    B --> C["False Negative"]
+```
 
 The benchmark in Chapter 14 demonstrates that these errors are measurable and that threshold selection affects their behavior. 
 
@@ -11223,7 +11709,12 @@ The system may determine that two observations appear to belong to the same loca
 
 Conceptually: 
 
-Observation 1 | v unknown_003 ^ | Observation 2 
+```mermaid
+flowchart TD
+    A["Observation 1"] --> U["Local ID: unknown_003"]
+    B["Observation 2"] --> U
+    U --> C["Continuity within N-ONE only"]
+```
 
 This establishes continuity within the system's own representation. 
 
@@ -11724,11 +12215,14 @@ Therefore, the fallback should not be represented as equivalent to:
 
 This creates an important architectural boundary: 
 
-Neural Runtime Available 
-
-| v Neural Face Representation | v Identity Matching 
-
-Neural Runtime Unavailable | v OpenCV Fallback | v Limited Face Processing | v No Unsupported Identity Claim 
+```mermaid
+flowchart TD
+    A{"Neural runtime available?"} -->|"Yes"| B["Neural Face Representation"]
+    B --> C["Identity Matching"]
+    A -->|"No"| D["OpenCV Fallback"]
+    D --> E["Limited Face Processing"]
+    E --> F["No Unsupported Identity Claim"]
+```
 
 This separation helps prevent the fallback mechanism from being interpreted as having the same identity-recognition capability as the evaluated neural models. 
 
@@ -11768,9 +12262,12 @@ Therefore, enrollment validation requires exactly one detected face.
 
 Real surveillance frames, however, may contain: 
 
-Person A     Person B     Person C ↓            ↓            ↓ 
-
-Face 1       Face 2       Face 3 
+```mermaid
+flowchart TD
+    F["Surveillance Frame"] --> A["Person A / Face 1"]
+    F --> B["Person B / Face 2"]
+    F --> C["Person C / Face 3"]
+```
 
 This introduces additional complexity during recognition because the system must determine which detected face corresponds to which identity or whether any detected face matches the selected target. 
 
@@ -11786,13 +12283,14 @@ This is a deliberate architectural distinction related to worker-thread safety.
 
 The browser processing workflow can therefore be represented as: 
 
-Browser Camera | v WebRTC Worker 
-
-| v Frame Processing | v Annotation | v 
-
-Protected Result State | v 
-
-Streamlit UI 
+```mermaid
+flowchart TD
+    A["Browser Camera"] --> B["WebRTC Worker"]
+    B --> C["Frame Processing"]
+    C --> D["Annotation"]
+    D --> E["Protected Result State"]
+    E --> F["Streamlit UI"]
+```
 
 rather than directly performing every application-state or CSV operation from the worker. 
 
@@ -11890,11 +12388,12 @@ The current threat-detection mechanism uses image-processing heuristics rather t
 
 Therefore: 
 
-Heuristic Result ↓ Possible Threat 
-
-does not mean: 
-
-Confirmed Threat 
+```mermaid
+flowchart TD
+    A["Heuristic Result"] --> B["Possible Threat Indicator"]
+    B --> C["Human Review"]
+    B -. "not proof of" .-> D["Confirmed Threat"]
+```
 
 Similarly: 
 
@@ -11960,11 +12459,12 @@ A candidate model must be evaluated using independent test data.
 
 The following structure should be maintained: 
 
-Enrollment Data 
-
-| v Candidate Model | X | X  Do not reuse as test | v 
-
-Independent Test Data 
+```mermaid
+flowchart TD
+    A["Enrollment Data"] --> B["Candidate Model"]
+    C["Independent Test Data"] --> B
+    A -. "do not reuse as test data" .-> C
+```
 
 If the same images are used for both enrollment and testing, the measured performance may not represent generalization to new observations. 
 
@@ -11978,7 +12478,12 @@ Independent impostors are required to test whether the candidate incorrectly acc
 
 The evaluation should therefore contain: 
 
-Genuine Victim + Independent Impostors | v Candidate Model | v TP / TN / FP / FN 
+```mermaid
+flowchart TD
+    A["Genuine Victim Trials"] --> C["Candidate Model"]
+    B["Independent Impostor Trials"] --> C
+    C --> D["TP / TN / FP / FN"]
+```
 
 This is particularly important because a model that increases genuine acceptance while also increasing false Victim matches may not provide an acceptable operational change. 
 
@@ -12106,11 +12611,14 @@ Unknown Re-ID should receive an independent benchmark.
 
 The dataset could contain several appearances of the same unknown person: 
 
-Camera A → unknown_001 Camera B → unknown_001 Camera C → unknown_001 
-
-along with different individuals: 
-
-Camera A → unknown_002 Camera B → unknown_003 
+```mermaid
+flowchart LR
+    A["Camera A"] --> U1["unknown_001"]
+    B["Camera B"] --> U1
+    C["Camera C"] --> U1
+    A --> U2["unknown_002"]
+    B --> U3["unknown_003"]
+```
 
 The evaluation could then determine whether the system correctly maintains identity continuity. 
 
@@ -12120,13 +12628,12 @@ Future evaluation should include labeled video sequences.
 
 The planned comparison can include: 
 
-1 Frame ↓ 
-
-Recognition Decision 
-
-3 Frames ↓ Consistency Decision 
-
-5 Frames ↓ Consistency Decision 
+```mermaid
+flowchart TD
+    A["1 Frame"] --> B["Recognition Decision"]
+    C["3 Frames"] --> D["Consistency Decision"]
+    E["5 Frames"] --> F["Consistency Decision"]
+```
 
 Metrics should include: 
 
@@ -12190,13 +12697,14 @@ Potential benefits include:
 
 A future architecture could therefore evolve from: 
 
-Streamlit | +---- Images 
-
-| +---- CSV Files 
-
-toward: 
-
-Streamlit | v Application/Data Layer | +-------------+ |             | v             v Database       Secure File Storage 
+```mermaid
+flowchart TD
+    A["Current: Streamlit"] --> B["Local Images"]
+    A --> C["CSV Files"]
+    D["Future: Streamlit"] --> E["Application / Data Layer"]
+    E --> F["Database"]
+    E --> G["Secure File Storage"]
+```
 
 This would be particularly relevant for multi-user or multi-camera deployment. 
 
@@ -12581,9 +13089,22 @@ One of the primary contributions of N-ONE is the integration of multiple compute
 
 The overall conceptual workflow can be represented as: 
 
-N-ONE | +---------------+---------------+ |               |               | v               v               v Victim Search    Registered       Threat Recognition     Monitoring |               |               | v               v               v Selected          Staff /       Heuristic Victim Target     Known User      Analysis 
-
-| +-------------------+ | v Unknown Person Re-ID | v Local Identity Continuity | v CSV / Image Evidence 
+```mermaid
+flowchart TD
+    N["N-ONE"] --> V["Victim Search"]
+    N --> R["Registered Monitoring"]
+    N --> T["Threat Recognition"]
+    V --> VS["Selected Victim Target"]
+    R --> RS["Staff / Known User"]
+    T --> TH["Heuristic Analysis"]
+    V --> U["Unknown Person Re-ID"]
+    R --> U
+    U --> C["Local Identity Continuity"]
+    VS --> E["CSV / Image Evidence"]
+    RS --> E
+    TH --> E
+    C --> E
+```
 
 The system therefore does not rely on a single recognition workflow for every operational situation. 
 
@@ -12599,7 +13120,14 @@ The operator selects a particular Victim profile, and the recognition process is
 
 Conceptually: 
 
-Selected Victim | v Target-specific Known Cache | v Face Comparison | +--------+ |        | v        v Match    No Match 
+```mermaid
+flowchart TD
+    A["Selected Victim"] --> B["Target-Specific Known Cache"]
+    B --> C["Face Comparison"]
+    C --> D{"Match?"}
+    D -->|"Yes"| E["Match"]
+    D -->|"No"| F["No Match"]
+```
 
 This prevents the Victim Search operation from being treated as an unrestricted search across every registered identity. 
 
@@ -12838,11 +13366,14 @@ The location-aware Victim workflow is particularly useful because a recognition 
 
 The conceptual flow is: 
 
-Face Observation | v Recognition Decision | 
-
-v Identity / Unknown Result | v Camera Location | v Timestamp | v 
-
-Stored Sighting Record 
+```mermaid
+flowchart TD
+    A["Face Observation"] --> B["Recognition Decision"]
+    B --> C["Identity / Unknown Result"]
+    C --> D["Camera Location"]
+    D --> E["Timestamp"]
+    E --> F["Stored Sighting Record"]
+```
 
 This converts an isolated frame-level result into a reviewable event. 
 
@@ -12990,7 +13521,23 @@ This approach makes the project more suitable for academic demonstration and fur
 
 The completed N-ONE prototype establishes a common operational framework in which: 
 
-Authentication ↓ Role Selection ↓ Profile Management ↓ Camera / Image Input ↓ Processing Mode | +-------------------+ |         |         | v         v         v Victim    Staff     Threat Search    /Known    Analysis | v Unknown Re-ID | v Evidence / Logs | v Human Review 
+```mermaid
+flowchart TD
+    A["Authentication"] --> B["Role Selection"]
+    B --> C["Profile Management"]
+    C --> D["Camera / Image Input"]
+    D --> E["Processing Mode"]
+    E --> F["Victim Search"]
+    E --> G["Staff / Known Recognition"]
+    E --> H["Threat Analysis"]
+    F --> I["Unknown Re-ID"]
+    G --> I
+    F --> J["Evidence / Logs"]
+    G --> J
+    H --> J
+    I --> J
+    J --> K["Human Review"]
+```
 
 This structure demonstrates how different computer-vision capabilities can coexist without being treated as identical tasks. 
 
@@ -13028,13 +13575,17 @@ The next stage of N-ONE should focus on controlled validation rather than simply
 
 The recommended progression is: 
 
-Larger Independent Dataset ↓ 
-
-Staff / Unknown / Threat Benchmarks ↓ 
-
-Labeled Video Evaluation 
-
-↓ Threshold Calibration ↓ Performance Benchmarking ↓ Security Strengthening ↓ Transactional Storage ↓ Controlled Deployment ↓ Multi-Camera Evaluation 
+```mermaid
+flowchart TD
+    A["Larger Independent Dataset"] --> B["Staff / Unknown / Threat Benchmarks"]
+    B --> C["Labeled Video Evaluation"]
+    C --> D["Threshold Calibration"]
+    D --> E["Performance Benchmarking"]
+    E --> F["Security Strengthening"]
+    F --> G["Transactional Storage"]
+    G --> H["Controlled Deployment"]
+    H --> I["Multi-Camera Evaluation"]
+```
 
 This approach allows each stage to be validated before introducing additional complexity. 
 
@@ -13092,9 +13643,13 @@ This paper provides the academic foundation for the FaceNet approach used in the
 
 In N-ONE, this concept is used in the general pipeline: 
 
-Face Image ↓ Face Representation ↓ Embedding ↓ Distance Calculation ↓ 
-
-Threshold Decision 
+```mermaid
+flowchart TD
+    A["Face Image"] --> B["Face Representation"]
+    B --> C["Embedding"]
+    C --> D["Distance Calculation"]
+    D --> E["Threshold Decision"]
+```
 
 #### **2. ArcFace** 
 
@@ -13353,7 +13908,16 @@ For online references, the final report should use the actual date on which the 
 
 The final verification process can be represented as: 
 
-Reference ↓ Verify Author / Organization ↓ Verify Title ↓ Verify Publication / Documentation ↓ Verify URL / Repository ↓ Add Access Date ↓ Check Citation Style ↓ Final Bibliography 
+```mermaid
+flowchart TD
+    A["Reference"] --> B["Verify Author / Organization"]
+    B --> C["Verify Title"]
+    C --> D["Verify Publication / Documentation"]
+    D --> E["Verify URL / Repository"]
+    E --> F["Add Access Date"]
+    F --> G["Check Citation Style"]
+    G --> H["Final Bibliography"]
+```
 
 ### **19.12 Chapter Conclusion** 
 
