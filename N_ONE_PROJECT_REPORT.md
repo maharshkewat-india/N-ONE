@@ -7,28 +7,6 @@
 
 **Implementation source of truth:** `app.py`, `deepface_adapter.py`, project tests, evaluation scripts/results, configuration files, and repository documentation.
 
-> **Academic status note:** This report describes the repository that exists. It does not convert proposed features into implemented features, and it does not treat a limited benchmark as universal accuracy evidence.
-
----
-
-# FRONT MATTER
-
-## Certificate
-
-[INSTITUTIONAL CERTIFICATE REQUIRED - NOT PRESENT IN REPOSITORY]
-
-This section must be replaced with the university-approved certificate wording, student names, guide details, signatures, dates, department, and institutional seal.
-
-## Self Declaration
-
-[STUDENT DECLARATION REQUIRED - NOT PRESENT IN REPOSITORY]
-
-The student declaration must be supplied using the university template. It must not be fabricated from this report.
-
-## Acknowledgement
-
-[STUDENT-SUPPLIED ACKNOWLEDGEMENT REQUIRED]
-
 ## Abstract
 
 N-ONE, expanded as **No One Escapes**, is a Python and Streamlit surveillance dashboard intended to assist operators with three related but distinct workflows: Lost Person Search, Member Attendance Logger, and Threat Detection Mode. The application supports browser camera input through WebRTC when the optional media stack is installed, as well as host webcams, recorded video files, and IP camera URLs through OpenCV. It places an authentication gate before the dashboard and distinguishes Administrator and Operator privileges.
