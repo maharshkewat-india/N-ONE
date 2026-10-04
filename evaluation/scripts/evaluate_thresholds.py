@@ -17,13 +17,8 @@ RESULTS_CSV = ROOT / "evaluation" / "results" / "threshold_results.csv"
 
 def dataset_ready() -> bool:
     return all(
-        (
-            DATASET_PATH / "victims").exists(),
-            (DATASET_PATH / "staff").exists(),
-            (DATASET_PATH / "impostors").exists(),
-            (DATASET_PATH / "unknown").exists(),
-            (DATASET_PATH / "threats").exists(),
-        )
+        (DATASET_PATH / category).is_dir()
+        for category in ("victims", "staff", "impostors", "unknown", "threats")
     )
 
 

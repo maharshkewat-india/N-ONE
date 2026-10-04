@@ -1,5 +1,5 @@
 model,backend,metric,status,evidence
-Facenet,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
-Facenet512,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
-ArcFace,DeepFace,cosine,INSUFFICIENT TEST DATA,No TensorFlow/DeepFace runtime and no labeled evaluation dataset found.
-OpenCVFaceBackend,Haar + HOG/CLAHE fallback,cosine,ACTIVE BASELINE,Actual runtime in this workspace; no benchmark data available.
+Facenet,DeepFace,cosine,RUNTIME UNAVAILABLE,"Labeled evaluation data is present, but the DeepFace/TensorFlow runtime could not be imported."
+Facenet512,DeepFace,cosine,RUNTIME UNAVAILABLE,"Labeled evaluation data is present, but the DeepFace/TensorFlow runtime could not be imported."
+ArcFace,DeepFace,cosine,RUNTIME UNAVAILABLE,"Labeled evaluation data is present, but the DeepFace/TensorFlow runtime could not be imported."
+OpenCVFaceBackend,Haar + HOG/CLAHE fallback,cosine,ACTIVE BASELINE,OpenCV fallback is available; no independent recognition benchmark has been run.

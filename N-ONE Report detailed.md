@@ -9486,11 +9486,12 @@ The threat-detection implementation uses geometric contour heuristics and delibe
 
 Finally, the current single-module architecture is appropriate for the project's prototype scope but has limitations involving code concentration, concurrent CSV access, absence of database transactions, lack of a schema-migration mechanism, and absence of an encrypted storage wrapper. These limitations should remain explicitly documented rather than being presented as capabilities that the current implementation does not provide. 
 
+
 ## **CHAPTER 14 – RESULT AND ANALYSIS** 
 
 This chapter presents the experimental results obtained from the N-ONE evaluation workspace. The primary focus of the benchmark is **Victim Face Recognition** , with particular attention to model comparison, threshold behavior, false Victim matches, and inference performance. 
 
-The evaluation is deliberately separated from the live production configuration. Therefore, the measured benchmark results are reported as experimental evidence under the specified dataset and test protocol rather than as universal claims about the complete N-ONE system. 
+The evaluation is deliberately separated from the live production configuration. The results below are transcribed from the checked-in benchmark CSVs. During the 2026-10-04 audit, the dataset files and source hashes were checked, and all 27 stored threshold rows plus the threshold-0.40 model counts were independently recalculated from the stored trial distances. A fresh neural-model run could not be completed because Windows blocked TensorFlow's native ml_dtypes extension. These values are therefore verified as internally consistent stored benchmark results, but were not freshly reproduced in this audit. They are not universal claims about the complete N-ONE system.
 
 ### **14.1 Evaluation Protocol** 
 
@@ -9574,9 +9575,9 @@ If an impostor is correctly rejected, it contributes to **True Negative (TN)** .
 
 This distinction is particularly important for Victim Search because a false Victim identification is a more significant error than simply failing to recognize a genuine target. 
 
-## **14.2 Threshold-0.40 Model Comparison** 
+## **14.2 Recorded Threshold-0.40 Model Comparison**
 
-The following results were obtained at a threshold of **0.40** . 
+The following values are recorded in `evaluation/results/model_comparison.csv` at threshold **0.40**. Their TP/TN/FP/FN counts agree with the checked-in genuine and impostor trial rows when those distances are recalculated at 0.40. The benchmark inference itself was not reproduced in the 2026-10-04 audit; see Section 15.23.
 
 | **Model** | **TP** | **TN** | **FP** | **FN** | **Precision** | **Recall** | **F1** | **FAR** | **FRR** | **False Victim matches** |
 |---|---:|---:|---:|---:|---:|---:|---:|---:|---:|---:|
@@ -9816,9 +9817,9 @@ At threshold 0.60, FaceNet512 and ArcFace still recorded zero false positives in
 
 ## **14.5 Performance Evidence** 
 
-The benchmark performance file contains **55 image-level rows for each model** . 
+The stored performance summary records **55 input images per model** (11 enrollment, 32 genuine-test, and 12 impostor images). It has one aggregate row per model, not 55 per-image timing rows. The original inference timings could not be reproduced in the 2026-10-04 audit; see Section 15.23.
 
-The measured average inference latency was approximately: 
+The saved performance CSV reports the following average inference latencies; this audit verified the stored rows but could not reproduce the model inference:
 
 |**Model**|**Average Latency**|**Derived Average**<br>**FPS**|
 |---|---|---|
@@ -9870,7 +9871,7 @@ The benchmark documentation indicates that the measured inference time includes 
 
 - Embedding generation 
 
-The benchmark did not use GPU acceleration. 
+The stored benchmark report records CPU execution and no GPU use. This setting was not independently remeasured in the current audit.
 
 Therefore, these numbers should **not** be presented as the guaranteed FPS of the complete N-ONE application. 
 
@@ -10865,137 +10866,54 @@ The current benchmark does not contain the labeled video sequences required to e
 
 Therefore, multi-frame performance remains unmeasured. 
 
-## **15.23 Current Validation Status** 
+## **15.23 Fresh Validation Audit - 2026-10-04**
 
-The final audit attempted to execute the available test suite using the project Python environments. 
+The following checks were run in this workspace on 2026-10-04. Earlier audit results are historical; the entries below replace the previous test status.
 
-However, the checked-in new_venv environment does not contain the pytest package. 
+| Check | Command / evidence | Result |
+|---|---|---|
+| Automated suite | `.venv\Scripts\python.exe -m pytest tests -q` | **26 passed in 3.27s** |
+| Metadata schema assertion | `tests/test_evaluation_dataset.py::test_dataset_metadata_has_required_columns` | Passed after aligning the expected header with the checked-in seven-column schema: `id,file_path,identity,category,split,condition,expected_result`. |
+| Collector save and metadata test | `tests/test_evaluation_collector.py::test_valid_file_saves_and_updates_metadata_atomically` | Passed. Its scratch directory is now created under `tests/` and removed after the test, avoiding the inaccessible system temp directory in this managed Windows environment. |
+| Python syntax check | `python -m py_compile app.py deepface_adapter.py evaluation\collector.py evaluation\scripts\run_benchmark.py evaluation\scripts\evaluate_models.py evaluation\scripts\evaluate_thresholds.py evaluation\scripts\generate_metrics.py` | Passed after correcting the syntax in `evaluate_thresholds.py`. |
+| Dataset integrity | Read `evaluation/dataset_metadata.csv`; checked all referenced files and the SHA-256 values in `evaluation/impostor_sources.csv` | 55 metadata records; 0 missing image files; all 12 source hashes matched their local image files. Counts: 11 Victim enrollment, 32 Victim test, 12 impostor test. No extra online data was needed. |
+| Application smoke check | Started `streamlit run app.py --server.headless true --server.port 8513`; requested `http://127.0.0.1:8513` | Streamlit started and returned HTTP 200. This verifies server/page response only; login and protected workflows were not exercised. |
+| Model preflight | `.venv-deepface\Scripts\python.exe evaluation\scripts\evaluate_models.py` | `RUNTIME UNAVAILABLE`: dataset is present, but DeepFace/TensorFlow could not be imported. The CSV now distinguishes missing runtime from missing data. |
+| Threshold planning script | `.venv\Scripts\python.exe evaluation\scripts\evaluate_thresholds.py` | Ran successfully and wrote seven `PLANNED` rows for thresholds 0.20-0.50. This script records readiness only; it does not calculate recognition metrics. |
+| Stored threshold metrics | Recomputed TP/TN/FP/FN from `victim_results.csv` and `impostor_results.csv` for each stored threshold | All 27 rows in `threshold_comparison.csv` matched the recomputed counts. At 0.40, FaceNet (21,60,0,11), FaceNet512 (22,60,0,10), and ArcFace (23,60,0,9) matched `model_comparison.csv`. This checks stored arithmetic, not fresh model inference. |
+| Neural benchmark rerun | `.venv-deepface\Scripts\python.exe evaluation\scripts\run_benchmark.py` with UTF-8 console output | Blocked during TensorFlow import: Windows Application Control denied loading `ml_dtypes._ml_dtypes_ext`. Python 3.12.10, DeepFace 0.0.101, and TensorFlow 2.21.0 were installed in that environment. No new model results were produced. |
 
-The system Python 3.14 environment also reports: 
+The dataset folders are populated despite the older "no real evaluation data" statements in `evaluation/README.md` and `evaluation/dataset/README.md`. The LFW manifest hashes match the local files, but this audit does not establish a broad reuse license for the underlying images. Existing model-result CSVs retain prior outputs; their inference and timing could not be independently reproduced here.
 
-No module named pytest 
+## **15.24 Interpretation of Stored AI Results**
 
-Therefore, a fresh successful test-run result cannot be claimed from this audit. 
+The stored model and threshold CSVs contain trial-level distances marked `ok`, and the aggregate confusion-matrix counts agree with those distances. This is evidence that the saved CSVs are internally consistent. Since a fresh DeepFace inference run was blocked by the environment, report their recognition and latency values as **stored benchmark results, not results reproduced in the current audit**. Do not claim that all model tests were rerun or that current neural inference is operational in this workspace.
 
-This distinction is important: 
+The saved measured threshold table covers 0.20 through 0.60 and its arithmetic was checked directly from the stored per-trial CSVs. The separate `evaluate_thresholds.py` readiness script now runs, but writes only `PLANNED` rows for 0.20 through 0.50; it does not regenerate model embeddings or measured results.
 
-The existence of test files in the repository is not equivalent to successfully executing those tests during the final audit. 
+## **15.25 Application and Screenshot Evidence**
 
-The current validation status should therefore be documented separately from historical test evidence. 
+`report_evidence/screenshots/` currently contains nine PNG files. The screenshot manifest identifies the demonstrated UI states and marks blocked or uncaptured states separately. The screenshots document a 2026-09-25 application session; they are historical UI evidence, not a live-session test from 2026-10-04. They show interface states and do not prove recognition accuracy, threat-detection accuracy, or a successful camera feed.
 
-## **15.24 Historical Test Evidence** 
+## **15.26 Validation Gaps**
 
-A previous repository audit recorded: 
+The following areas remain unmeasured or incomplete in the available evidence:
 
-24 passed 1 failed 1 error 
+- A fresh neural benchmark inference run in an environment where TensorFlow's native extensions are permitted.
+- Full Streamlit browser end-to-end coverage and a demonstrated Operator workflow.
+- Independent Staff recognition, Unknown Re-ID, and Threat Detection accuracy benchmarks.
+- Labeled video data for one-, three-, and five-frame confirmation.
+- Multi-user concurrency, application-wide resource usage, and production camera capacity.
 
-However, this result is **historical evidence** . 
+The test files establish intended coverage, but only successful executions count as current test results. Unit tests do not establish recognition accuracy, real-world camera performance, or legal compliance.
 
-It should not be represented as the result of the latest audit because the current audit did not successfully reproduce the complete test run. 
+## **15.27 Evaluation Documentation Consistency**
 
-The historical failure concerned the expected ordering of columns in: 
+`evaluation/README.md` and `evaluation/dataset/README.md` still say that no real evaluation data is present. That statement is stale: the checked-in metadata lists 55 records, all referenced files exist, and the LFW image hashes match the source manifest. `evaluation/results/model_results.csv` was refreshed by the preflight script and now reports `RUNTIME UNAVAILABLE` with the dataset-present condition. `evaluation/results/threshold_results.csv` records seven `PLANNED` thresholds; it does not contain measured model metrics. The separate `threshold_comparison.csv` contains prior trial outputs whose arithmetic was rechecked, while fresh model inference remains blocked as described in Section 15.23.
 
-evaluation/dataset_metadata.csv 
+## **15.28 Current Testing Assessment**
 
-The test expected: 
-
-file_path 
-
-to appear first, while the checked-in collector schema writes: 
-
-id 
-
-as the first column. 
-
-Therefore, there is a schema-order inconsistency between the test expectation and the checked-in collector output. 
-
-## **15.25 Metadata Column-Order Issue** 
-
-The identified issue can be represented as: 
-
-```mermaid
-flowchart LR
-    A["Test expectation: file_path first"] --> B["Schema order mismatch"]
-    B --> C["Checked-in collector: id first"]
-```
-
-The problem concerns the expected order of metadata columns rather than necessarily indicating that the data itself is semantically incorrect. 
-
-However, because automated tests should agree with the current schema, the discrepancy should be resolved before final submission or explicitly documented as a known test issue. 
-
-A final report should not silently claim that all tests pass while this inconsistency remains unresolved. 
-
-## **15.26 Temporary-Directory Error** 
-
-The historical audit also recorded an error related to temporary-directory handling. 
-
-The available evidence identifies this as an **environment-related error** rather than a demonstrated functional failure of the N-ONE application. 
-
-Nevertheless, because the current audit could not reproduce the complete test suite, the issue should remain visible in the testing documentation until it can be reproduced and resolved. 
-
-This follows the principle: 
-
-An unresolved test error should be documented rather than silently removed from the project record. 
-
-## **15.27 Evaluation Documentation Contradiction** 
-
-Another validation issue exists within the evaluation documentation. 
-
-The evaluation workspace contains actual: 
-
-- populated dataset information, 
-
-- measured CSV result files, 
-
-- benchmark evidence. 
-
-However, older versions of: 
-
-evaluation/README.md 
-
-and: 
-
-evaluation/dataset/README.md 
-
-still describe the evaluation workspace as having no real evaluation data. 
-
-Therefore, the current repository contains a documentation-state contradiction. 
-
-Conceptually: 
-
-Older README 
-
-"No real evaluation data" 
-
-| X | Current Workspace Populated dataset + measured CSVs 
-
-The measured CSV files contain explicit benchmark values and are therefore used as evidence in Chapter 14. 
-
-The older README statements are treated as **legacy documentation** , not as current benchmark results. 
-
-## **15.28 Importance of Documentation Consistency** 
-
-Documentation consistency is important in a research-oriented project because a reviewer may inspect both the source code and the supporting documentation. 
-
-If the README says: 
-
-No evaluation data exists 
-
-while the repository simultaneously contains populated benchmark results, the reviewer may be uncertain about which information represents the current project state. 
-
-Therefore, the final submission should clearly distinguish: 
-
-- current evaluation status, 
-
-- historical documentation, 
-
-- measured results, 
-
-● future evaluation plans. 
-
-A simple status table can help: 
-
-**Component Current Status** Evaluation workspace Populated Benchmark result CSVs Present Victim benchmark Measured Staff benchmark Not measured Unknown Re-ID benchmark Not measured Threat benchmark Not measured Multi-frame benchmark Not available Older README status Legacy/inconsistent 
+The current audit passed all 26 automated tests, compiled the listed project Python files, checked the dataset inventory and stored benchmark arithmetic, and confirmed an HTTP 200 application response. It did **not** produce a fresh neural benchmark because Windows blocked the TensorFlow native extension. Staff, Unknown Re-ID, Threat Detection, full browser end-to-end, concurrency, and multi-frame validation remain unavailable.
 
 ## **15.29 Testing Evidence Classification** 
 
@@ -11076,7 +10994,7 @@ The testing system itself has limitations.
 
 First, most automated tests are behavior-oriented rather than complete end-to-end tests. 
 
-Second, the absence of a successful current pytest run means that the latest audit cannot claim a complete automated pass status. 
+Second, a passing unit suite does not cover complete browser workflows or live camera behavior.
 
 Third, the AI benchmark and application tests operate at different levels. A successful model benchmark does not prove that the complete Streamlit application behaves correctly. 
 
@@ -11088,63 +11006,19 @@ Unit tests, application end-to-end tests, AI benchmarks, and real-world deployme
 
 Each provides different evidence. 
 
-## **15.33 Overall Testing Assessment** 
+## **15.33 Overall Testing Assessment**
 
-The N-ONE project contains a meaningful testing foundation covering several critical behaviors. 
+The project has 26 automated tests covering adapter behavior, profile categorization, unknown-person data, Victim target filtering, browser annotation, fallback safety, dataset paths, metadata, and face-count validation. All 26 passed in the 4 October 2026 run.
 
-The strongest areas of the current test design include: 
-
-- authentication configuration handling, 
-
-- profile categorization, 
-
-- unknown-person data integrity, 
-
-- Victim target filtering, 
-
-- multi-angle cache loading, 
-
-- browser annotation safety, 
-
-- fallback identity safety, 
-
-- evaluation path validation, 
-
-- enrollment face-count validation, 
-
-- test-image validation, 
-
-- AI benchmark and threshold evaluation. 
-
-At the same time, the current testing evidence has clearly documented limitations. 
-
-The most important outstanding areas are: 
-
-- complete reproducible pytest execution, 
-
-- full Streamlit browser end-to-end testing, 
-
-- concurrency testing, 
-
-- independent Staff benchmark, 
-
-- Unknown Re-ID benchmark, 
-
-- Threat Detection benchmark, 
-
-- labeled multi-frame video evaluation, 
-
-- resolution of the metadata column-order mismatch, 
-
-● cleanup/update of contradictory legacy evaluation README files. 
+The current evidence still does not include a reproducible neural benchmark, complete browser end-to-end coverage, independent Staff, Unknown Re-ID, or Threat Detection accuracy measurements, concurrency testing, or labeled multi-frame video evaluation. The older evaluation README files also need their dataset status updated. These remain validation work; unit-test success does not establish recognition accuracy or operational performance.
 
 ## **15.34 Chapter Summary** 
 
 Software testing in N-ONE is designed around the project's major functional and AI-processing boundaries. The existing tests verify important behaviors such as authentication configuration, profile classification, unknown-person data handling, Victim target restriction, browser annotation, fallback safety, and evaluation dataset validation. 
 
-The AI evaluation layer separately validates model comparison and threshold behavior using independent enrollment and test data. This separation is important because software correctness and recognition-model performance represent different dimensions of system validation. 
+The evaluation scripts and saved CSVs cover separate parts of model comparison and threshold analysis. This audit ran the threshold readiness script, checked the saved metric arithmetic, and could not rerun neural inference because the runtime import was blocked. Software correctness and recognition-model performance remain separate dimensions of system validation.
 
-The current audit, however, does **not** provide evidence for claiming that the complete automated test suite currently passes. The checked-in environments do not contain pytest, and therefore the historical result of 24 passed, 1 failed, and 1 error must remain classified as historical evidence. The metadata column-order discrepancy and temporary-directory issue must also remain documented until they are reproduced and resolved. 
+The 2026-10-04 audit ran the suite and recorded 26 passed. All listed project Python files compiled, the dataset inventory and saved metric arithmetic were checked, and the application smoke check returned HTTP 200. The neural benchmark could not be reproduced because Windows Application Control blocked TensorFlow's native `ml_dtypes` extension. Therefore, the suite passes, while the stored model-performance numbers remain unreproduced in this audit.
 
 Similarly, the absence of Staff, Unknown Re-ID, Threat Detection, multi-user concurrency, full browser end-to-end, and labeled multi-frame tests must remain visible rather than being represented as completed validation. 
 
@@ -13595,7 +13469,7 @@ N-ONE demonstrates an implemented Streamlit prototype for AI-assisted surveillan
 
 A central strength of the project is its explicit separation of operational tasks. **Victim Search** is treated as a selected known-identity search problem, **Unknown Re-ID** as a local continuity problem, and **Threat Detection** as an independent heuristic analysis problem. This separation reduces conceptual ambiguity and makes the individual subsystems easier to evaluate and improve independently. 
 
-The project also contains meaningful experimental evidence for Victim face recognition. At a cosine-distance threshold of **0.40** , the tested FaceNet, FaceNet512, and ArcFace configurations produced zero observed false Victim matches in the available negative trials. Among these configurations, ArcFace produced the highest measured recall and F1 in the evaluated sample. However, these findings are limited to the defined dataset and experimental protocol and should not be interpreted as universal accuracy or guaranteed operational safety. 
+The repository contains stored trial-level evidence for Victim face recognition. At a cosine-distance threshold of **0.40** , the saved FaceNet, FaceNet512, and ArcFace result rows record zero false Victim matches in 60 negative trials, and ArcFace has the highest saved recall and F1. The 2026-10-04 audit verified the dataset files and recalculated the saved metrics, but could not rerun neural inference because Windows Application Control blocked TensorFlow's native `ml_dtypes` extension. These figures are stored benchmark results, not a fresh reproduction, and do not establish universal accuracy or operational safety.
 
 The current live Victim Search configuration remains **FaceNet + OpenCV + cosine distance + threshold 0.40** , while the OpenCV fallback provides a lightweight alternative when the neural runtime is unavailable. The distinction between the benchmark configuration and production configuration is therefore maintained explicitly. 
 

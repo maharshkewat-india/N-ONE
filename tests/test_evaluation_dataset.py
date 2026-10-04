@@ -23,5 +23,5 @@ def test_evaluation_dataset_structure_exists() -> None:
 def test_dataset_metadata_has_required_columns() -> None:
     assert METADATA_PATH.exists(), "Metadata file is missing"
     header = METADATA_PATH.read_text(encoding="utf-8").strip().splitlines()[0]
-    expected = "file_path,identity,category,split,condition,expected_result"
+    expected = "id,file_path,identity,category,split,condition,expected_result"
     assert header == expected, f"Unexpected metadata header: {header!r}"

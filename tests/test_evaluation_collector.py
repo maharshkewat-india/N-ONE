@@ -2,13 +2,27 @@ from __future__ import annotations
 
 import csv
 import inspect
+import shutil
+import uuid
 from pathlib import Path
+from typing import Iterator
 
 import cv2
 import numpy as np
 import pytest
 
 from evaluation import collector
+
+
+@pytest.fixture
+def project_tmp_path() -> Iterator[Path]:
+    """Use a workspace-local scratch path when pytest's external temp is blocked."""
+    path = Path(__file__).parent / f".collector-test-{uuid.uuid4().hex}"
+    path.mkdir()
+    try:
+        yield path
+    finally:
+        shutil.rmtree(path)
 
 
 def test_enrollment_and_test_paths_are_separate() -> None:
@@ -110,16 +124,17 @@ def test_multiple_faces_are_allowed_for_test(monkeypatch: pytest.MonkeyPatch) ->
 
 
 def test_valid_file_saves_and_updates_metadata_atomically(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, project_tmp_path: Path
 ) -> None:
     class FixedUuid:
         hex = "sample-id"
 
-    dataset_root = tmp_path / "dataset"
-    metadata_path = tmp_path / "dataset_metadata.csv"
+    dataset_root = project_tmp_path / "dataset"
+    metadata_path = project_tmp_path / "dataset_metadata.csv"
     image_bytes = b"valid image bytes"
     monkeypatch.setattr(collector, "DATASET_ROOT", dataset_root)
     monkeypatch.setattr(collector, "METADATA_PATH", metadata_path)
+    monkeypatch.setattr(collector, "ROOT", project_tmp_path)
     monkeypatch.setattr(collector, "decode_image", lambda _: np.zeros((2, 2, 3), dtype=np.uint8))
     monkeypatch.setattr(collector, "validate_faces", lambda image, enrollment: 1)
     monkeypatch.setattr(collector.uuid, "uuid4", lambda: FixedUuid())
@@ -144,7 +159,7 @@ def test_valid_file_saves_and_updates_metadata_atomically(
             "expected_result": "genuine_victim",
         }
     ]
-    assert not list(tmp_path.glob("*.tmp"))
+    assert not list(project_tmp_path.glob("*.tmp"))
 
 
 def test_collector_does_not_require_deepface() -> None:
