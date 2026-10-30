@@ -1,5 +1,7 @@
 import hmac
 import os
+import shutil
+import tempfile
 import threading
 import time
 from io import BytesIO
@@ -151,6 +153,7 @@ TEMP_VIDEO_PATH = ROOT_DIR / "temp_video_upload.mp4"
 UNKNOWN_DB_PATH = ROOT_DIR / "unknown_person_db.csv"
 UNKNOWN_SIGHTING_LOG_PATH = ROOT_DIR / "unknown_sighting_log.csv"
 VICTIM_SIGHTING_LOG_PATH = LOG_DIR / "victim_sighting_log.csv"
+VICTIM_PROFILE_DETAILS_PATH = ROOT_DIR / "victim_profile_details.csv"
 
 # DeepFace Model Configuration
 DEEPFACE_MODELS = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "ArcFace", "SFace"]
@@ -159,10 +162,12 @@ DEEPFACE_METRICS = ["cosine", "euclidean", "euclidean_l2"]
 ATTRIBUTE_TASKS = ["age", "gender", "emotion", "race"]
 
 # Default Configuration
-DEEPFACE_MODEL = "Facenet"
+DEEPFACE_MODEL = "Facenet512"
+# RetinaFace is accurate but expensive on a CPU-only Windows TensorFlow build.
+# OpenCV is the responsive default; RetinaFace remains available when needed.
 DEEPFACE_BACKEND = "opencv"
 DEEPFACE_METRIC = "cosine"
-COSINE_THRESHOLD = 0.40
+COSINE_THRESHOLD = 0.35
 PROFILE_IMAGE_SUFFIXES = {".jpg", ".jpeg", ".png"}
 ENROLLMENT_ANGLES = ("front", "left", "right", "up", "down")
 ENROLLMENT_INSTRUCTIONS = {
@@ -175,6 +180,7 @@ ENROLLMENT_INSTRUCTIONS = {
 
 # --- In-memory Cache ---
 KNOWN_FACE_ENCODINGS = []
+KNOWN_FACE_CACHE_SIGNATURE: tuple[object, ...] | None = None
 UNKNOWN_FACE_ENCODINGS: list[dict] = []
 UNKNOWN_FACE_CACHE_SETTINGS: tuple[str, str] | None = None
 UNKNOWN_FACE_CACHE_VERSION = 0
@@ -188,6 +194,10 @@ LAST_THREAT_LOG_TIME = 0.0
 # detector can now handle profile faces and will retry a small frame at a
 # higher scale when necessary.
 PROCESSING_MAX_WIDTH = 1280
+CPU_SAVER_PROCESSING_MAX_WIDTH = 640
+CPU_SAVER_INFERENCE_INTERVAL_SECONDS = 0.40
+CPU_SAVER_DISPLAY_INTERVAL_SECONDS = 0.06
+LAST_LOCAL_FACE_INFERENCE_TIME = 0.0
 
 
 def reliable_face_matching_available() -> bool:
@@ -220,7 +230,6 @@ def _represent_saved_unknown(
             detector_backend=detector_backend,
             enforce_detection=False,
             align=True,
-            silent=True,
         )
         if representations:
             return representations
@@ -237,7 +246,6 @@ def _represent_saved_unknown(
             enforce_detection=False,
             allow_full_image=True,
             align=True,
-            silent=True,
         )
         return representations if representations else []
     except Exception:
@@ -256,9 +264,24 @@ def ensure_unknown_face_cache(model_name: str, detector_backend: str) -> None:
         return
 
     UNKNOWN_FACE_ENCODINGS.clear()
+    converted_unknown_ids: set[str] = set()
+    try:
+        unknown_rows = pd.read_csv(UNKNOWN_DB_PATH)
+        if {"unknown_id", "assigned_name"}.issubset(unknown_rows.columns):
+            converted_unknown_ids = set(
+                unknown_rows.loc[
+                    unknown_rows["assigned_name"].fillna("").astype(str).str.strip() != "",
+                    "unknown_id",
+                ].astype(str)
+            )
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        pass
+
     if UNKNOWN_DIR.exists():
         for image_path in sorted(UNKNOWN_DIR.iterdir()):
             if not image_path.is_file() or image_path.suffix.lower() not in PROFILE_IMAGE_SUFFIXES:
+                continue
+            if image_path.stem in converted_unknown_ids:
                 continue
             representations = _represent_saved_unknown(
                 image_path, model_name, detector_backend
@@ -390,8 +413,39 @@ def get_profile_category(profile_stem: str) -> str:
     return "Victim" if prefix in {"victim", "lost"} else "Staff"
 
 
+VICTIM_PROFILE_DETAIL_COLUMNS = [
+    "profile_id",
+    "source_unknown_id",
+    "name",
+    "approximate_age",
+    "description",
+    "last_known_area",
+    "contact",
+    "notes",
+    "registered_at",
+]
+
+
+def get_victim_profile_details(profile_id: str | None = None):
+    """Load admin-entered case details for converted Victim profiles."""
+    try:
+        details = pd.read_csv(VICTIM_PROFILE_DETAILS_PATH).fillna("")
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        details = pd.DataFrame(columns=VICTIM_PROFILE_DETAIL_COLUMNS)
+
+    if profile_id is None:
+        return details
+    if "profile_id" not in details.columns:
+        return {}
+    matches = details[details["profile_id"].astype(str) == str(profile_id)]
+    return matches.iloc[-1].to_dict() if not matches.empty else {}
+
+
 def get_profile_name(profile_stem: str) -> str:
     """Return a readable profile name from a stored filename."""
+    details = get_victim_profile_details(profile_stem)
+    if details.get("name"):
+        return str(details["name"])
     base_stem = profile_stem.split("__", 1)[0]
     _, separator, name = base_stem.partition("_")
     return (name if separator else base_stem).replace("_", " ")
@@ -484,6 +538,12 @@ def get_unknown_profiles_df() -> pd.DataFrame:
             unknown_id = str(row.get("unknown_id", ""))
             if not unknown_id or unknown_id == "nan":
                 continue
+            known_ids.add(unknown_id)
+            assigned_name = str(row.get("assigned_name", "")).strip()
+            if assigned_name and assigned_name.lower() != "nan":
+                # Keep the source photo in the audit archive, but show the
+                # converted person in the Victim inventory instead.
+                continue
 
             # Prefer the current workspace location. Stored absolute paths can
             # point to an older machine, deployment, or deleted photo.
@@ -505,7 +565,6 @@ def get_unknown_profiles_df() -> pd.DataFrame:
                 # metadata remains in the CSV for audit/history purposes.
                 continue
 
-            known_ids.add(unknown_id)
             records.append(
                 {
                     "unknown_id": unknown_id,
@@ -618,6 +677,35 @@ def get_runtime_face_settings() -> tuple[str, str, str]:
     )
 
 
+def cpu_saver_enabled() -> bool:
+    """Return whether live recognition should favor responsiveness over FPS."""
+    return bool(st.session_state.get("cpu_saver_mode", True))
+
+
+def get_processing_max_width() -> int:
+    """Use a smaller inference image in the default CPU-saving profile."""
+    return (
+        CPU_SAVER_PROCESSING_MAX_WIDTH
+        if cpu_saver_enabled()
+        else PROCESSING_MAX_WIDTH
+    )
+
+
+def should_skip_local_face_inference() -> bool:
+    """Throttle only active local camera recognition, never one-off operations."""
+    global LAST_LOCAL_FACE_INFERENCE_TIME
+    if not (
+        cpu_saver_enabled()
+        and st.session_state.get("streaming", False)
+    ):
+        return False
+    now = time.monotonic()
+    if now - LAST_LOCAL_FACE_INFERENCE_TIME < CPU_SAVER_INFERENCE_INTERVAL_SECONDS:
+        return True
+    LAST_LOCAL_FACE_INFERENCE_TIME = now
+    return False
+
+
 def represent_registered_face(
     image_path: Path,
     model_name: str,
@@ -636,7 +724,6 @@ def represent_registered_face(
         "detector_backend": detector_backend,
         "enforce_detection": False,
         "align": True,
-        "silent": True,
     }
     representations: list[dict] = []
     try:
@@ -657,18 +744,48 @@ def represent_registered_face(
         return representations
 
 
+def get_known_face_cache_signature(
+    model_name: str, detector_backend: str
+) -> tuple[object, ...]:
+    """Return a cheap fingerprint for enrolled images and their display metadata."""
+    profile_files = []
+    if REG_DIR.exists():
+        for image_path in sorted(REG_DIR.glob("*.*")):
+            if image_path.suffix.lower() not in PROFILE_IMAGE_SUFFIXES:
+                continue
+            try:
+                stat = image_path.stat()
+            except OSError:
+                continue
+            profile_files.append((image_path.name, stat.st_mtime_ns, stat.st_size))
+
+    victim_details = None
+    try:
+        stat = VICTIM_PROFILE_DETAILS_PATH.stat()
+        victim_details = (stat.st_mtime_ns, stat.st_size)
+    except OSError:
+        pass
+    return (model_name, detector_backend, tuple(profile_files), victim_details)
+
+
+def invalidate_known_face_cache() -> None:
+    """Force the next run to rebuild known embeddings after profile changes."""
+    global KNOWN_FACE_CACHE_SIGNATURE
+    KNOWN_FACE_ENCODINGS.clear()
+    KNOWN_FACE_CACHE_SIGNATURE = None
+
+
 def load_known_face_encodings(
     model_name: str = DEEPFACE_MODEL,
     detector_backend: str = DEEPFACE_BACKEND,
 ) -> None:
-    """Refresh all registered-face embeddings directly from the profile database.
-
-    This intentionally is not a Streamlit resource cache. The function fills
-    a process-global list consumed by the camera worker; caching a function
-    with only this side effect can leave a stale/empty profile list after an
-    administrator replaces or adds multi-angle images.
-    """
+    """Refresh embeddings only when enrolled profiles or settings change."""
+    global KNOWN_FACE_CACHE_SIGNATURE
     if DeepFace is None:
+        return
+
+    signature = get_known_face_cache_signature(model_name, detector_backend)
+    if signature == KNOWN_FACE_CACHE_SIGNATURE:
         return
 
     KNOWN_FACE_ENCODINGS.clear()
@@ -706,6 +823,7 @@ def load_known_face_encodings(
                     "encoding": embedding,
                 }
             )
+    KNOWN_FACE_CACHE_SIGNATURE = signature
 
 
 def calculate_face_distance(
@@ -831,6 +949,188 @@ def register_new_unknown(
     log_event(mode=mode, subject_id=unknown_id, role="Unknown", event_type="New Unknown Detected")
     
     return unknown_id
+
+
+def write_csv_atomically(frame: pd.DataFrame, path: Path) -> None:
+    """Replace one app CSV without leaving a partially-written file."""
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="w",
+            encoding="utf-8",
+            newline="",
+            suffix=".tmp",
+            dir=path.parent,
+            delete=False,
+        ) as temporary_file:
+            temporary_path = Path(temporary_file.name)
+            frame.to_csv(temporary_file, index=False)
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None and temporary_path.exists():
+            temporary_path.unlink()
+
+
+def convert_unknown_to_victim(
+    unknown_id: str,
+    name: str,
+    approximate_age: str = "",
+    description: str = "",
+    last_known_area: str = "",
+    contact: str = "",
+    notes: str = "",
+    confirmed: bool = False,
+    profile_category: str = "Victim",
+) -> tuple[bool, str]:
+    """Promote an admin-confirmed unknown photo to a searchable known profile."""
+    global UNKNOWN_FACE_CACHE_SETTINGS, UNKNOWN_FACE_CACHE_BUILT_VERSION
+
+    if st.session_state.get("role") != "Administrator":
+        return False, "Only an Administrator can register an Unknown profile."
+    if profile_category not in {"Staff", "Victim"}:
+        return False, "Choose Staff or Victim as the known profile category."
+    if not confirmed:
+        return False, "Confirm that the photo and person details have been checked."
+
+    clean_name = str(name).strip()
+    if not clean_name:
+        return False, "Enter the person's name or confirmed identifier."
+    safe_name = "".join(ch if ch.isalnum() else "_" for ch in clean_name).strip("_")
+    safe_unknown_id = "".join(
+        ch if ch.isalnum() else "_" for ch in str(unknown_id)
+    ).strip("_")
+    if not safe_name or not safe_unknown_id:
+        return False, "The name or Unknown ID is not valid."
+
+    unknown_profiles = get_unknown_profiles_df()
+    matches = unknown_profiles[unknown_profiles["unknown_id"].astype(str) == str(unknown_id)]
+    if matches.empty:
+        return False, "That Unknown profile is unavailable or was already converted."
+    source_path = Path(str(matches.iloc[0]["image_path"]))
+    if not source_path.is_file():
+        return False, "The saved Unknown photo could not be found."
+
+    base_profile_id = f"{profile_category}_{safe_name}_{safe_unknown_id}"
+    profile_id = base_profile_id
+    suffix = 2
+    while get_profile_angle_paths(profile_id) or any(
+        REG_DIR.glob(f"{profile_id}__*.*")
+    ):
+        profile_id = f"{base_profile_id}_{suffix}"
+        suffix += 1
+    destination = REG_DIR / f"{profile_id}__front{source_path.suffix.lower()}"
+    save_victim_details = profile_category == "Victim"
+    details_path_existed = VICTIM_PROFILE_DETAILS_PATH.exists()
+    unknown_path_existed = UNKNOWN_DB_PATH.exists()
+    original_details_df = get_victim_profile_details()
+    details_written = False
+    unknown_written = False
+
+    try:
+        if save_victim_details:
+            details_df = original_details_df.copy()
+            details_df = details_df.reindex(columns=VICTIM_PROFILE_DETAIL_COLUMNS)
+            details_df = details_df[details_df["profile_id"].astype(str) != profile_id]
+            details_df = pd.concat(
+                [
+                    details_df,
+                    pd.DataFrame(
+                        [[
+                            profile_id,
+                            str(unknown_id),
+                            clean_name,
+                            str(approximate_age).strip(),
+                            str(description).strip(),
+                            str(last_known_area).strip(),
+                            str(contact).strip(),
+                            str(notes).strip(),
+                            time.strftime("%Y-%m-%d %H:%M:%S"),
+                        ]],
+                        columns=VICTIM_PROFILE_DETAIL_COLUMNS,
+                    ),
+                ],
+                ignore_index=True,
+            )
+
+        try:
+            unknown_df = pd.read_csv(UNKNOWN_DB_PATH).fillna("")
+        except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+            unknown_df = pd.DataFrame()
+        original_unknown_df = unknown_df.copy()
+        required_columns = [
+            "unknown_id",
+            "image_path",
+            "first_seen_timestamp",
+            "last_seen_timestamp",
+            "last_known_location",
+            "assigned_name",
+        ]
+        for column in required_columns:
+            if column not in unknown_df.columns:
+                unknown_df[column] = ""
+        db_rows = unknown_df[unknown_df["unknown_id"].astype(str) == str(unknown_id)]
+        if db_rows.empty:
+            unknown_df = pd.concat(
+                [
+                    unknown_df,
+                    pd.DataFrame(
+                        [[
+                            str(unknown_id),
+                            str(source_path),
+                            "",
+                            "",
+                            "",
+                            clean_name,
+                        ]],
+                        columns=required_columns,
+                    ),
+                ],
+                ignore_index=True,
+            )
+        else:
+            unknown_df.loc[
+                unknown_df["unknown_id"].astype(str) == str(unknown_id),
+                "assigned_name",
+            ] = clean_name
+
+        REG_DIR.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source_path, destination)
+        if save_victim_details:
+            write_csv_atomically(details_df, VICTIM_PROFILE_DETAILS_PATH)
+            details_written = True
+        write_csv_atomically(unknown_df, UNKNOWN_DB_PATH)
+        unknown_written = True
+    except Exception as exc:
+        if destination.exists():
+            destination.unlink()
+        if details_written:
+            if details_path_existed:
+                write_csv_atomically(original_details_df, VICTIM_PROFILE_DETAILS_PATH)
+            elif VICTIM_PROFILE_DETAILS_PATH.exists():
+                VICTIM_PROFILE_DETAILS_PATH.unlink()
+        if unknown_written:
+            if unknown_path_existed:
+                write_csv_atomically(original_unknown_df, UNKNOWN_DB_PATH)
+            elif UNKNOWN_DB_PATH.exists():
+                UNKNOWN_DB_PATH.unlink()
+        return False, f"Could not save the {profile_category} profile: {exc}"
+
+    UNKNOWN_FACE_ENCODINGS[:] = [
+        entry for entry in UNKNOWN_FACE_ENCODINGS
+        if str(entry.get("unknown_id")) != str(unknown_id)
+    ]
+    UNKNOWN_FACE_CACHE_SETTINGS = None
+    UNKNOWN_FACE_CACHE_BUILT_VERSION = -1
+    invalidate_known_face_cache()
+    log_event(
+        mode="Victim Profile Administration",
+        subject_id=profile_id,
+        role=profile_category,
+        event_type=f"Unknown Converted to {profile_category}",
+        details=f"Source Unknown ID: {unknown_id}; admin-confirmed enrollment.",
+    )
+    return True, f"{clean_name} is now registered as {profile_category}."
 
 
 def log_sighting(unknown_id: str, timestamp: str, location: str) -> None:
@@ -980,7 +1280,7 @@ def get_face_embeddings(frame: np.ndarray, model: str = DEEPFACE_MODEL) -> list:
     
     try:
         embeddings = DeepFace.represent(
-            img_path=frame, model_name=model, enforce_detection=False, silent=True
+            img_path=frame, model_name=model, enforce_detection=False
         )
         return embeddings if isinstance(embeddings, list) else []
     except Exception as e:
@@ -1063,11 +1363,12 @@ def process_frame(
 ) -> tuple[np.ndarray, str]:
     """The core processing pipeline for each video frame."""
     processing_frame = frame
-    if frame.shape[1] > PROCESSING_MAX_WIDTH:
-        resize_ratio = PROCESSING_MAX_WIDTH / frame.shape[1]
+    processing_max_width = get_processing_max_width()
+    if frame.shape[1] > processing_max_width:
+        resize_ratio = processing_max_width / frame.shape[1]
         processing_frame = cv2.resize(
             frame,
-            (PROCESSING_MAX_WIDTH, max(1, int(frame.shape[0] * resize_ratio))),
+            (processing_max_width, max(1, int(frame.shape[0] * resize_ratio))),
             interpolation=cv2.INTER_AREA,
         )
     annotated_frame = processing_frame.copy()
@@ -1109,6 +1410,11 @@ def process_frame(
         st.session_state.last_status = detection_summary
         return annotated_frame, detection_summary
 
+    if should_skip_local_face_inference():
+        detection_summary = "CPU saver: waiting for next face scan."
+        st.session_state.last_status = detection_summary
+        return annotated_frame, detection_summary
+
     # --- 2. Face Detection & Recognition (For all other modes) ---
     try:
         face_objs = DeepFace.represent(
@@ -1117,7 +1423,6 @@ def process_frame(
             enforce_detection=False,
             detector_backend=detector_backend,
             align=True,
-            silent=True,
         )
     except Exception as e:
         st.session_state.last_status = f"DeepFace Error: {e}"
@@ -1364,6 +1669,7 @@ def annotate_browser_frame(
     threshold: float,
     location: str = "Main Feed",
     status_sink: dict | None = None,
+    processing_max_width: int = PROCESSING_MAX_WIDTH,
 ) -> np.ndarray:
     """Annotate a browser-camera frame without touching Streamlit state.
 
@@ -1373,11 +1679,11 @@ def annotate_browser_frame(
     as the recorded-video path.
     """
     processing_frame = frame
-    if frame.shape[1] > PROCESSING_MAX_WIDTH:
-        ratio = PROCESSING_MAX_WIDTH / frame.shape[1]
+    if frame.shape[1] > processing_max_width:
+        ratio = processing_max_width / frame.shape[1]
         processing_frame = cv2.resize(
             frame,
-            (PROCESSING_MAX_WIDTH, max(1, int(frame.shape[0] * ratio))),
+            (processing_max_width, max(1, int(frame.shape[0] * ratio))),
             interpolation=cv2.INTER_AREA,
         )
     annotated = processing_frame.copy()
@@ -1400,7 +1706,6 @@ def annotate_browser_frame(
             detector_backend=detector_backend,
             enforce_detection=False,
             align=True,
-            silent=True,
         )
     except Exception as exc:
         cv2.putText(annotated, f"Recognition error: {str(exc)[:70]}", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (0, 0, 255), 2)
@@ -1474,7 +1779,7 @@ if VideoProcessorBase is not None:
     class BrowserCameraProcessor(VideoProcessorBase):
         """WebRTC worker that performs live browser-camera face matching."""
 
-        def __init__(self, mode: str, target_profile_id: str | None, model_name: str, detector_backend: str, metric: str, threshold: float, location: str):
+        def __init__(self, mode: str, target_profile_id: str | None, model_name: str, detector_backend: str, metric: str, threshold: float, location: str, processing_max_width: int = PROCESSING_MAX_WIDTH, inference_interval_seconds: float = 0.0):
             self.mode = mode
             self.target_profile_id = target_profile_id
             self.model_name = model_name
@@ -1482,6 +1787,9 @@ if VideoProcessorBase is not None:
             self.metric = metric
             self.threshold = threshold
             self.location = location
+            self.processing_max_width = processing_max_width
+            self.inference_interval_seconds = inference_interval_seconds
+            self._last_inference_time = 0.0
             self._status_lock = threading.Lock()
             self._latest_victim = None
 
@@ -1491,6 +1799,22 @@ if VideoProcessorBase is not None:
 
         def recv(self, frame):
             image = frame.to_ndarray(format="bgr24")
+            now = time.monotonic()
+            if (
+                self.inference_interval_seconds > 0
+                and now - self._last_inference_time < self.inference_interval_seconds
+            ):
+                preview = image
+                if preview.shape[1] > self.processing_max_width:
+                    ratio = self.processing_max_width / preview.shape[1]
+                    preview = cv2.resize(
+                        preview,
+                        (self.processing_max_width, max(1, int(preview.shape[0] * ratio))),
+                        interpolation=cv2.INTER_AREA,
+                    )
+                cv2.putText(preview, "CPU saver: live preview", (12, 28), cv2.FONT_HERSHEY_SIMPLEX, 0.65, (0, 220, 255), 2)
+                return av.VideoFrame.from_ndarray(preview, format="bgr24")
+            self._last_inference_time = now
             status_sink = {}
             annotated = annotate_browser_frame(
                 image,
@@ -1502,6 +1826,7 @@ if VideoProcessorBase is not None:
                 self.threshold,
                 self.location,
                 status_sink,
+                self.processing_max_width,
             )
             with self._status_lock:
                 self._latest_victim = status_sink.get("victim")
@@ -1522,6 +1847,8 @@ def render_browser_camera(
 
     model_name, detector_backend, metric = get_runtime_face_settings()
     threshold = float(st.session_state.get("similarity_threshold", COSINE_THRESHOLD))
+    cpu_saver = cpu_saver_enabled()
+    processing_max_width = get_processing_max_width()
     st.info("Allow camera permission, then press START inside the browser camera panel.")
     try:
         context = webrtc_streamer(
@@ -1536,6 +1863,8 @@ def render_browser_camera(
                 metric,
                 threshold,
                 location,
+                processing_max_width,
+                CPU_SAVER_INFERENCE_INTERVAL_SECONDS if cpu_saver else 0.0,
             ),
             async_processing=True,
         )
@@ -1769,6 +2098,8 @@ def configure_session_state() -> None:
         "similarity_threshold": COSINE_THRESHOLD,
         "registration_capture_started": False,
         "registration_capture_source": None,
+        "show_log_viewer": False,
+        "cpu_saver_mode": True,
     }
     for key, value in defaults.items():
         st.session_state.setdefault(key, value)
@@ -1917,10 +2248,26 @@ def clear_audit_log() -> None:
 
 def clear_registered_profiles() -> None:
     """Clear registered face profiles. This operation is available to Administrators only."""
-    for profile_path in REG_DIR.glob("*"):
+    profile_paths = [profile_path for profile_path in REG_DIR.glob("*") if profile_path.is_file()]
+    removed_profile_ids = {
+        get_profile_id(profile_path.stem)
+        for profile_path in profile_paths
+        if profile_path.suffix.lower() in PROFILE_IMAGE_SUFFIXES
+    }
+    for profile_path in profile_paths:
         if profile_path.is_file():
             profile_path.unlink()
-    KNOWN_FACE_ENCODINGS.clear()
+    if removed_profile_ids and VICTIM_PROFILE_DETAILS_PATH.exists():
+        details = get_victim_profile_details()
+        if "profile_id" in details.columns:
+            details = details[
+                ~details["profile_id"].astype(str).isin(removed_profile_ids)
+            ]
+            if details.empty:
+                VICTIM_PROFILE_DETAILS_PATH.unlink()
+            else:
+                write_csv_atomically(details, VICTIM_PROFILE_DETAILS_PATH)
+    invalidate_known_face_cache()
 
 
 def clear_unknown_face_data() -> None:
@@ -2022,6 +2369,24 @@ def render_sidebar() -> None:
                     st.sidebar.error("Too many failed attempts. Login is locked for 60 seconds.")
                 else:
                     st.sidebar.error("Invalid credentials.")
+
+    if st.session_state.authenticated:
+        st.sidebar.markdown("---")
+        cpu_saver = st.sidebar.toggle(
+            "CPU saver (recommended)",
+            key="cpu_saver_mode",
+            help="Uses the faster OpenCV detector, a smaller scan image, and a 2.5 FPS face-scan limit. Turn it off only when maximum detection frequency is required.",
+        )
+        if cpu_saver:
+            current_backend = st.session_state.get("selected_backend", DEEPFACE_BACKEND)
+            if current_backend != "opencv":
+                st.session_state["cpu_saver_previous_backend"] = current_backend
+                st.session_state["selected_backend"] = "opencv"
+            st.sidebar.caption("Fast CPU profile: OpenCV detector, 640px scans, up to 2.5 face scans/sec.")
+        elif st.session_state.get("cpu_saver_previous_backend"):
+            st.session_state["selected_backend"] = st.session_state.pop(
+                "cpu_saver_previous_backend"
+            )
 
     if st.session_state.role == "Administrator":
         st.sidebar.markdown("---")
@@ -2290,11 +2655,29 @@ def render_main_ui() -> None:
         ["1. Lost Person Search", "2. Member Attendance Logger", "3. Threat Detection Mode"],
         key="selected_mode", help="Select the primary mission for the AI."
     )
+    switch_to_browser = st.session_state.pop("switch_to_browser_camera", False)
+    if switch_to_browser:
+        # Apply this before creating the radio widget; Streamlit does not allow
+        # changing a widget's session-state value after the widget is rendered.
+        st.session_state["input_source"] = "Browser Webcam (WebRTC)"
+    camera_fallback_message = st.session_state.pop(
+        "camera_fallback_message", ""
+    )
+    camera_fallback_details = st.session_state.pop(
+        "camera_fallback_details", ""
+    )
     source_type = col_ctrl2.radio(
         "Select Video Input Source",
         ["Browser Webcam (WebRTC)", "Laptop Webcam", "Recorded Video File", "IP Camera Stream"],
-        horizontal=True, key="input_source"
+        horizontal=True,
+        key="input_source",
+        help="Laptop Webcam can access cameras attached to the machine running Streamlit. If OpenCV cannot open one, N-ONE offers the browser camera as a fallback.",
     )
+    if camera_fallback_message:
+        st.info(camera_fallback_message)
+        if camera_fallback_details:
+            with st.expander("Local webcam attempt details"):
+                st.caption(camera_fallback_details)
 
     video_target = None
     browser_camera = source_type == "Browser Webcam (WebRTC)"
@@ -2387,13 +2770,22 @@ def render_main_ui() -> None:
     elif st.session_state.streaming and video_target is not None:
         cap, source_status = open_video_source(video_target)
         if cap is None:
-            st.session_state.streaming = False
-            st.error(source_status)
-            status_area.error("Surveillance feed could not be started.")
-            frame_placeholder.error(
-                "Feed unavailable. Select Recorded Video File, or allow webcam access "
-                "and use WebRTC when the app is running remotely."
-            )
+            if source_type == "Laptop Webcam":
+                st.session_state["switch_to_browser_camera"] = True
+                st.session_state["camera_fallback_message"] = (
+                    "OpenCV could not access the server webcam. N-ONE switched to the browser camera; "
+                    "allow camera access and press START in its panel."
+                )
+                st.session_state["camera_fallback_details"] = source_status
+                st.rerun()
+            else:
+                st.session_state.streaming = False
+                st.error(source_status)
+                status_area.error("Surveillance feed could not be started.")
+                frame_placeholder.error(
+                    "Feed unavailable. Select Recorded Video File, or allow webcam access "
+                    "and use WebRTC when the app is running remotely."
+                )
         else:
             if source_status:
                 status_area.info(f"Source: {source_status}")
@@ -2431,7 +2823,11 @@ def render_main_ui() -> None:
                 final_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
                 frame_placeholder.image(final_frame, width='stretch')
                 
-                time.sleep(0.01)
+                time.sleep(
+                    CPU_SAVER_DISPLAY_INTERVAL_SECONDS
+                    if cpu_saver_enabled()
+                    else 0.01
+                )
 
         if cap is not None and cap.isOpened():
             cap.release()
@@ -2566,6 +2962,21 @@ def render_face_photo_gallery(registered_df: pd.DataFrame | None = None) -> None
                 st.write(f"**Name:** {selected_record['name']}")
                 st.write(f"**Category:** {selected_record['category']}")
                 st.write(f"**Profile ID:** `{selected_record['profile_id']}`")
+                if gallery_category == "Victim":
+                    victim_details = get_victim_profile_details(
+                        str(selected_record["profile_id"])
+                    )
+                    detail_labels = {
+                        "approximate_age": "Approximate age",
+                        "description": "Identifying details",
+                        "last_known_area": "Last known area",
+                        "contact": "Family / case contact",
+                        "notes": "Case notes",
+                    }
+                    for field, label in detail_labels.items():
+                        value = str(victim_details.get(field, "")).strip()
+                        if value and value.lower() != "nan":
+                            st.write(f"**{label}:** {value}")
             else:
                 st.write(f"**Unknown ID:** `{selected_record['unknown_id']}`")
                 assigned_name = selected_record.get("assigned_name", "")
@@ -2580,6 +2991,77 @@ def render_face_photo_gallery(registered_df: pd.DataFrame | None = None) -> None
                 st.write(
                     f"**Last location:** {selected_record.get('last_known_location', '') or 'Unavailable'}"
                 )
+                if st.session_state.get("role") == "Administrator":
+                    st.markdown("#### Register this Unknown as a known person")
+                    st.caption(
+                        "Confirm the person's identity before enrollment. Their original Unknown photo and sightings stay in the audit archive."
+                    )
+                    profile_category = st.selectbox(
+                        "Register as",
+                        options=["Staff", "Victim"],
+                        key=f"convert_category_{selected_record['unknown_id']}",
+                        help="Staff profiles are available for known-person matching; Victim profiles are available in Victim Search.",
+                    )
+                    with st.form(f"convert_unknown_{selected_record['unknown_id']}"):
+                        victim_name = st.text_input(
+                            "Confirmed name or identifier",
+                            key=f"convert_name_{selected_record['unknown_id']}",
+                        )
+                        if profile_category == "Victim":
+                            victim_age = st.text_input(
+                                "Approximate age (optional)",
+                                key=f"convert_age_{selected_record['unknown_id']}",
+                            )
+                            victim_description = st.text_area(
+                                "Identifying details (optional)",
+                                key=f"convert_description_{selected_record['unknown_id']}",
+                            )
+                            victim_area = st.text_input(
+                                "Last known area (optional)",
+                                key=f"convert_area_{selected_record['unknown_id']}",
+                            )
+                            victim_contact = st.text_input(
+                                "Family / case contact (optional)",
+                                key=f"convert_contact_{selected_record['unknown_id']}",
+                            )
+                            victim_notes = st.text_area(
+                                "Case notes (optional)",
+                                key=f"convert_notes_{selected_record['unknown_id']}",
+                            )
+                        identity_confirmed = st.checkbox(
+                            "I verified that this photo and the entered details belong to this person.",
+                            key=f"convert_confirm_{selected_record['unknown_id']}",
+                        )
+                        submitted = st.form_submit_button(
+                            "Add to known profiles", type="primary", width="stretch"
+                        )
+                    if submitted:
+                        converted, message = convert_unknown_to_victim(
+                            unknown_id=str(selected_record["unknown_id"]),
+                            name=victim_name,
+                            profile_category=profile_category,
+                            approximate_age=(
+                                victim_age if profile_category == "Victim" else ""
+                            ),
+                            description=(
+                                victim_description if profile_category == "Victim" else ""
+                            ),
+                            last_known_area=(
+                                victim_area if profile_category == "Victim" else ""
+                            ),
+                            contact=(
+                                victim_contact if profile_category == "Victim" else ""
+                            ),
+                            notes=(
+                                victim_notes if profile_category == "Victim" else ""
+                            ),
+                            confirmed=identity_confirmed,
+                        )
+                        if converted:
+                            st.toast(message)
+                            st.rerun()
+                        else:
+                            st.error(message)
 
 
 def render_facial_analytics_panel() -> None:
@@ -2733,7 +3215,8 @@ def main() -> None:
         load_known_face_encodings(model_name, detector_backend)
         render_main_ui()
         render_facial_analytics_panel()
-        render_log_viewer()
+        if st.toggle("Show audit and detection logs", key="show_log_viewer"):
+            render_log_viewer()
     else:
         st.warning("🔒 System locked. Please authenticate via the sidebar.")
 

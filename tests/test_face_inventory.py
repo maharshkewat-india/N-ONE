@@ -1,4 +1,5 @@
 import shutil
+import time
 from pathlib import Path
 from uuid import uuid4
 
@@ -125,6 +126,41 @@ def test_known_face_database_refresh_includes_all_saved_angles(monkeypatch) -> N
             "front", "left", "right", "up", "down"
         }
         assert all(entry["profile_id"] == "Victim_alpha" for entry in app.KNOWN_FACE_ENCODINGS)
+    finally:
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+
+def test_known_face_cache_skips_unchanged_enrollment_images(monkeypatch) -> None:
+    test_dir = Path(__file__).parent / f"_known_cache_{uuid4().hex}"
+    registered_dir = test_dir / "registered_faces"
+    registered_dir.mkdir(parents=True)
+    profile_image = registered_dir / "Staff_alpha__front.jpg"
+    profile_image.touch()
+    calls = []
+
+    class EmbeddingBackend:
+        @staticmethod
+        def represent(**kwargs):
+            calls.append(kwargs)
+            return [{"embedding": [1.0, 0.0]}]
+
+    try:
+        monkeypatch.setattr(app, "REG_DIR", registered_dir)
+        monkeypatch.setattr(app, "DeepFace", EmbeddingBackend)
+        monkeypatch.setattr(app, "KNOWN_FACE_CACHE_SIGNATURE", None)
+        app.KNOWN_FACE_ENCODINGS.clear()
+
+        app.load_known_face_encodings("Facenet", "opencv")
+        initial_call_count = len(calls)
+        app.load_known_face_encodings("Facenet", "opencv")
+
+        assert initial_call_count > 0
+        assert len(calls) == initial_call_count
+        assert len(app.KNOWN_FACE_ENCODINGS) == initial_call_count
+
+        profile_image.write_bytes(b"updated enrollment")
+        app.load_known_face_encodings("Facenet", "opencv")
+        assert len(calls) == initial_call_count * 2
     finally:
         shutil.rmtree(test_dir, ignore_errors=True)
 
@@ -270,6 +306,55 @@ def test_browser_camera_identifies_selected_victim_with_neural_runtime(monkeypat
     assert annotated[10, 10].tolist() == [0, 0, 255]
 
 
+def test_process_frame_calls_represent_without_legacy_silent_argument(monkeypatch) -> None:
+    class CurrentDeepFaceBackend:
+        @staticmethod
+        def represent(
+            *,
+            img_path,
+            model_name,
+            enforce_detection,
+            detector_backend,
+            align,
+        ):
+            return []
+
+    monkeypatch.setattr(app, "DeepFace", CurrentDeepFaceBackend)
+    monkeypatch.setattr(
+        app, "get_runtime_face_settings", lambda: ("Facenet512", "retinaface", "cosine")
+    )
+    monkeypatch.setattr(app, "record_detection_result", lambda *args, **kwargs: None)
+
+    _, summary = app.process_frame(
+        np.zeros((60, 60, 3), dtype=np.uint8), "1. Lost Person Search"
+    )
+
+    assert summary == "No faces detected in frame."
+
+
+def test_cpu_saver_uses_smaller_frames_and_throttles_live_inference(monkeypatch) -> None:
+    monkeypatch.setattr(
+        app,
+        "LAST_LOCAL_FACE_INFERENCE_TIME",
+        time.monotonic(),
+    )
+    monkeypatch.setattr(
+        app.st,
+        "session_state",
+        {
+            "cpu_saver_mode": True,
+            "streaming": True,
+            "selected_model": "Facenet512",
+            "selected_backend": "opencv",
+            "selected_metric": "cosine",
+        },
+    )
+
+    assert app.get_processing_max_width() == app.CPU_SAVER_PROCESSING_MAX_WIDTH
+    assert app.get_runtime_face_settings()[1] == "opencv"
+    assert app.should_skip_local_face_inference() is True
+
+
 def test_unknown_gallery_resolves_current_image_path(monkeypatch) -> None:
     test_dir = Path(__file__).parent / f"_face_inventory_{uuid4().hex}"
     unknown_dir = test_dir / "unknown_faces"
@@ -295,5 +380,58 @@ def test_unknown_gallery_resolves_current_image_path(monkeypatch) -> None:
 
         assert len(gallery) == 1
         assert Path(gallery.iloc[0]["image_path"]) == image_path
+    finally:
+        shutil.rmtree(test_dir, ignore_errors=True)
+
+
+def test_unknown_can_be_registered_as_staff(monkeypatch) -> None:
+    test_dir = Path(__file__).parent / f"_unknown_to_staff_{uuid4().hex}"
+    registered_dir = test_dir / "registered_faces"
+    unknown_dir = test_dir / "unknown_faces"
+    registered_dir.mkdir(parents=True)
+    unknown_dir.mkdir()
+    source_path = unknown_dir / "unknown_001.jpg"
+    source_path.write_bytes(b"face image")
+    unknown_db = test_dir / "unknown_person_db.csv"
+    details_path = test_dir / "victim_profile_details.csv"
+    pd.DataFrame(
+        {
+            "unknown_id": ["unknown_001"],
+            "image_path": [str(source_path)],
+            "assigned_name": [""],
+        }
+    ).to_csv(unknown_db, index=False)
+    events = []
+    try:
+        monkeypatch.setattr(app, "REG_DIR", registered_dir)
+        monkeypatch.setattr(app, "UNKNOWN_DB_PATH", unknown_db)
+        monkeypatch.setattr(app, "VICTIM_PROFILE_DETAILS_PATH", details_path)
+        monkeypatch.setattr(app, "UNKNOWN_DIR", unknown_dir)
+        monkeypatch.setattr(
+            app,
+            "get_unknown_profiles_df",
+            lambda: pd.DataFrame(
+                [{"unknown_id": "unknown_001", "image_path": str(source_path)}]
+            ),
+        )
+        monkeypatch.setattr(app.st, "session_state", {"role": "Administrator"})
+        monkeypatch.setattr(app, "log_event", lambda **event: events.append(event))
+        monkeypatch.setattr(app, "UNKNOWN_FACE_ENCODINGS", [])
+
+        registered, message = app.convert_unknown_to_victim(
+            unknown_id="unknown_001",
+            name="Ravendra Rao",
+            confirmed=True,
+            profile_category="Staff",
+        )
+
+        profile_path = registered_dir / "Staff_Ravendra_Rao_unknown_001__front.jpg"
+        assert registered
+        assert "Staff" in message
+        assert profile_path.read_bytes() == b"face image"
+        assert pd.read_csv(unknown_db).iloc[0]["assigned_name"] == "Ravendra Rao"
+        assert not details_path.exists()
+        assert events[0]["role"] == "Staff"
+        assert events[0]["event_type"] == "Unknown Converted to Staff"
     finally:
         shutil.rmtree(test_dir, ignore_errors=True)

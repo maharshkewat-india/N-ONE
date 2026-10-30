@@ -491,14 +491,16 @@ def load_deepface_backend() -> Any:
     if _BACKEND is not None:
         return _BACKEND
 
-    # Try to load real DeepFace first
+    # DeepFace exposes its API as functions on the `deepface.DeepFace` module.
     try:
-        # The DeepFace class is in the `DeepFace` module within the `deepface` package
-        deepface_module = importlib.import_module("deepface.DeepFace")
-        backend = getattr(deepface_module, "DeepFace", None)
-        if backend is None:
-            # This error is more specific and should not happen if the submodule structure is correct
-            raise AttributeError("The 'deepface.DeepFace' module does not expose the 'DeepFace' class.")
+        backend = importlib.import_module("deepface.DeepFace")
+        required_api = ("represent", "find", "verify")
+        missing_api = [name for name in required_api if not callable(getattr(backend, name, None))]
+        if missing_api:
+            raise AttributeError(
+                "The 'deepface.DeepFace' module is missing required API: "
+                + ", ".join(missing_api)
+            )
         _BACKEND = backend
         _DEEPFACE_IMPORT_ERROR = None
         return _BACKEND

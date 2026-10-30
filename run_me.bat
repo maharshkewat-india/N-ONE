@@ -9,7 +9,6 @@ if errorlevel 1 (
     pause
     exit /b 1
 )
-
 echo Setting up and starting N-ONE...
 powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0setup_and_run.ps1"
 set "exit_code=%ERRORLEVEL%"
