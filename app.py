@@ -135,8 +135,95 @@ st.markdown(
         0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.75); }
         50% { transform: scale(1.18); box-shadow: 0 0 0 0.55rem rgba(74, 222, 128, 0); }
     }
+
+    /* ---------- N-ONE UI components ---------- */
+    .status-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 4px 12px;
+        border-radius: 999px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+    .status-chip.live { background: rgba(34, 197, 94, 0.16); color: #bbf7d0; border-color: rgba(34, 197, 94, 0.45); }
+    .status-chip.searching { background: rgba(37, 99, 235, 0.16); color: #bfdbfe; border-color: rgba(37, 99, 235, 0.45); }
+    .status-chip.alert { background: rgba(239, 68, 68, 0.16); color: #fecaca; border-color: rgba(239, 68, 68, 0.45); }
+    .status-chip.idle { background: rgba(100, 116, 139, 0.14); color: #cbd5e1; border-color: rgba(100, 116, 139, 0.4); }
+    .status-chip.threat { background: rgba(234, 88, 12, 0.16); color: #ffedd5; border-color: rgba(234, 88, 12, 0.45); }
+    .status-chip .chip-dot {
+        width: 8px; height: 8px; border-radius: 50%; background: currentColor;
+    }
+    .status-chip.live .chip-dot { animation: status-pulse 1.2s ease-in-out infinite; }
+
+    .metric-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 1px solid #334155;
+        border-radius: 12px;
+        padding: 16px 14px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .metric-card .label {
+        font-size: 0.8rem; color: #94a3b8; font-weight: 600;
+        text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px;
+    }
+    .metric-card .value {
+        font-size: 1.75rem; font-weight: 700; color: #f8fafc; line-height: 1.1;
+    }
+    .metric-card .delta {
+        font-size: 0.85rem; margin-top: 4px;
+    }
+    .metric-card .delta.ok { color: #22c55e; }
+    .metric-card .delta.warn { color: #f59e0b; }
+    .metric-card .delta.bad { color: #ef4444; }
+
+    .camera-card {
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border: 1px solid #334155;
+        border-radius: 10px;
+        padding: 12px 14px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .camera-card .name { font-weight: 600; color: #f8fafc; }
+    .camera-card .health { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; }
+    .camera-card .health.ok { color: #22c55e; }
+    .camera-card .health.warn { color: #f59e0b; }
+    .camera-card .health.bad { color: #ef4444; }
+    .camera-card .meta { font-size: 0.78rem; color: #94a3b8; }
+
+    .panel-card {
+        background: #0b0f19;
+        border: 1px solid #1f2937;
+        border-radius: 10px;
+        padding: 14px;
+    }
+
+    .video-feed-wrapper {
+        border: 1px solid #334155;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #000;
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+    }
+
+    .overlay-badge {
+        position: absolute; top: 10px; left: 10px;
+        padding: 4px 8px; border-radius: 6px; font-size: 0.8rem;
+        font-weight: 600; color: white; background: rgba(0,0,0,0.55);
+        backdrop-filter: blur(4px);
+    }
+    .overlay-badge.live { background: rgba(22, 163, 74, 0.85); }
+    .overlay-badge.alert { background: rgba(239, 68, 68, 0.85); }
+
     @media (prefers-reduced-motion: reduce) {
-        div.stButton > button:first-child, .live .status-dot { animation: none; transition: none; }
+        div.stButton > button:first-child, .live .status-dot, .status-chip.live .chip-dot { animation: none; transition: none; }
     }
     </style>
     """,
@@ -154,12 +241,38 @@ UNKNOWN_DB_PATH = ROOT_DIR / "unknown_person_db.csv"
 UNKNOWN_SIGHTING_LOG_PATH = ROOT_DIR / "unknown_sighting_log.csv"
 VICTIM_SIGHTING_LOG_PATH = LOG_DIR / "victim_sighting_log.csv"
 VICTIM_PROFILE_DETAILS_PATH = ROOT_DIR / "victim_profile_details.csv"
+CASE_RECORDS_PATH = LOG_DIR / "investigation_cases.csv"
+CASE_ACTIVITY_LOG_PATH = LOG_DIR / "case_activity_log.csv"
 
 # DeepFace Model Configuration
 DEEPFACE_MODELS = ["VGG-Face", "Facenet", "Facenet512", "OpenFace", "DeepFace", "ArcFace", "SFace"]
 DEEPFACE_BACKENDS = ["opencv", "mtcnn", "retinaface", "mediapipe", "dlib", "ssd", "yolov8n", "yunet"]
 DEEPFACE_METRICS = ["cosine", "euclidean", "euclidean_l2"]
 ATTRIBUTE_TASKS = ["age", "gender", "emotion", "race"]
+CASE_STATUS_OPTIONS = ["Open", "Verified Lead", "Resolved", "Closed"]
+CASE_PRIORITY_OPTIONS = ["Low", "Medium", "High", "Critical"]
+CASE_RECORD_COLUMNS = [
+    "case_id",
+    "profile_id",
+    "subject_name",
+    "status",
+    "priority",
+    "opened_at",
+    "last_updated_at",
+    "last_seen_location",
+    "assigned_to",
+    "case_contact",
+    "notes",
+]
+CASE_ACTIVITY_COLUMNS = [
+    "activity_id",
+    "case_id",
+    "timestamp",
+    "event_type",
+    "location",
+    "actor",
+    "details",
+]
 
 # Default Configuration
 DEEPFACE_MODEL = "Facenet512"
@@ -378,6 +491,12 @@ def initialize_log_files() -> None:
     if not VICTIM_SIGHTING_LOG_PATH.exists() or VICTIM_SIGHTING_LOG_PATH.stat().st_size == 0:
         pd.DataFrame(columns=["profile_id", "name", "timestamp", "location"]).to_csv(
             VICTIM_SIGHTING_LOG_PATH, index=False
+        )
+    if not CASE_RECORDS_PATH.exists() or CASE_RECORDS_PATH.stat().st_size == 0:
+        pd.DataFrame(columns=CASE_RECORD_COLUMNS).to_csv(CASE_RECORDS_PATH, index=False)
+    if not CASE_ACTIVITY_LOG_PATH.exists() or CASE_ACTIVITY_LOG_PATH.stat().st_size == 0:
+        pd.DataFrame(columns=CASE_ACTIVITY_COLUMNS).to_csv(
+            CASE_ACTIVITY_LOG_PATH, index=False
         )
 
 
@@ -970,6 +1089,269 @@ def write_csv_atomically(frame: pd.DataFrame, path: Path) -> None:
     finally:
         if temporary_path is not None and temporary_path.exists():
             temporary_path.unlink()
+
+
+def load_investigation_cases() -> pd.DataFrame:
+    """Load the case register, returning a stable shape for an empty or old file."""
+    try:
+        cases = pd.read_csv(CASE_RECORDS_PATH).fillna("")
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return pd.DataFrame(columns=CASE_RECORD_COLUMNS)
+
+    for column in CASE_RECORD_COLUMNS:
+        if column not in cases.columns:
+            cases[column] = ""
+    cases = cases[CASE_RECORD_COLUMNS]
+    return cases[
+        cases["case_id"].astype(str).str.strip() != ""
+    ].sort_values("opened_at", ascending=False, ignore_index=True)
+
+
+def load_case_activity() -> pd.DataFrame:
+    """Load human-entered case actions without exposing malformed rows to the UI."""
+    try:
+        activity = pd.read_csv(CASE_ACTIVITY_LOG_PATH).fillna("")
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        return pd.DataFrame(columns=CASE_ACTIVITY_COLUMNS)
+
+    for column in CASE_ACTIVITY_COLUMNS:
+        if column not in activity.columns:
+            activity[column] = ""
+    return activity[CASE_ACTIVITY_COLUMNS]
+
+
+def get_investigation_case(case_id: str) -> dict[str, str]:
+    """Return one case record, or an empty mapping when it no longer exists."""
+    cases = load_investigation_cases()
+    matches = cases[cases["case_id"].astype(str) == str(case_id)]
+    return matches.iloc[0].to_dict() if not matches.empty else {}
+
+
+def _next_case_id(cases: pd.DataFrame) -> str:
+    """Create a readable, daily sequence without placing personal data in the ID."""
+    date_prefix = time.strftime("CASE-%Y%m%d-")
+    existing_ids = set(cases.get("case_id", pd.Series(dtype=str)).astype(str))
+    sequence = 1
+    while f"{date_prefix}{sequence:03d}" in existing_ids:
+        sequence += 1
+    return f"{date_prefix}{sequence:03d}"
+
+
+def _append_case_activity(
+    case_id: str,
+    event_type: str,
+    location: str,
+    actor: str,
+    details: str,
+) -> None:
+    """Persist one human case action as an immutable timeline event."""
+    activity = load_case_activity()
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    event = pd.DataFrame(
+        [[
+            f"{case_id}-ACT-{time.time_ns()}",
+            case_id,
+            timestamp,
+            str(event_type).strip(),
+            str(location).strip(),
+            str(actor).strip(),
+            str(details).strip(),
+        ]],
+        columns=CASE_ACTIVITY_COLUMNS,
+    )
+    write_csv_atomically(
+        pd.concat([activity, event], ignore_index=True), CASE_ACTIVITY_LOG_PATH
+    )
+
+
+def create_investigation_case(
+    profile_id: str,
+    priority: str = "Medium",
+    last_seen_location: str = "",
+    assigned_to: str = "",
+    case_contact: str = "",
+    notes: str = "",
+) -> tuple[bool, str, str]:
+    """Open one administrator-approved investigation for a registered Victim."""
+    if st.session_state.get("role") != "Administrator":
+        return False, "Only an Administrator can open an investigation case.", ""
+    if priority not in CASE_PRIORITY_OPTIONS:
+        return False, "Choose a valid case priority.", ""
+
+    profiles = get_registered_profiles_df()
+    victim = profiles[
+        (profiles["profile_id"].astype(str) == str(profile_id))
+        & (profiles["category"].astype(str) == "Victim")
+    ]
+    if victim.empty:
+        return False, "Choose a registered Victim profile for this case.", ""
+
+    cases = load_investigation_cases()
+    active_duplicate = cases[
+        (cases["profile_id"].astype(str) == str(profile_id))
+        & (~cases["status"].astype(str).isin(["Resolved", "Closed"]))
+    ]
+    if not active_duplicate.empty:
+        return (
+            False,
+            f"{victim.iloc[0]['name']} already has active case "
+            f"{active_duplicate.iloc[0]['case_id']}.",
+            "",
+        )
+
+    case_id = _next_case_id(cases)
+    subject_name = str(victim.iloc[0]["name"]).strip()
+    timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+    record = pd.DataFrame(
+        [[
+            case_id,
+            str(profile_id),
+            subject_name,
+            "Open",
+            priority,
+            timestamp,
+            timestamp,
+            str(last_seen_location).strip(),
+            str(assigned_to).strip(),
+            str(case_contact).strip(),
+            str(notes).strip(),
+        ]],
+        columns=CASE_RECORD_COLUMNS,
+    )
+    write_csv_atomically(pd.concat([cases, record], ignore_index=True), CASE_RECORDS_PATH)
+    _append_case_activity(
+        case_id,
+        "Case opened",
+        last_seen_location,
+        "Administrator",
+        "Investigation opened from the registered Victim profile.",
+    )
+    log_event(
+        mode="Case Command Center",
+        subject_id=case_id,
+        role="Victim Case",
+        event_type="Case Opened",
+        details=f"Victim profile: {profile_id}; priority: {priority}.",
+    )
+    return True, f"Case {case_id} opened for {subject_name}.", case_id
+
+
+def update_investigation_case(
+    case_id: str,
+    status: str,
+    priority: str,
+    last_seen_location: str,
+    assigned_to: str,
+    case_contact: str,
+    notes: str,
+    activity_type: str,
+    activity_location: str,
+    activity_note: str,
+) -> tuple[bool, str]:
+    """Update case metadata and append a reviewable human investigation action."""
+    if st.session_state.get("role") != "Administrator":
+        return False, "Only an Administrator can update an investigation case."
+    if status not in CASE_STATUS_OPTIONS or priority not in CASE_PRIORITY_OPTIONS:
+        return False, "Choose a valid case status and priority."
+
+    cases = load_investigation_cases()
+    matches = cases["case_id"].astype(str) == str(case_id)
+    if not matches.any():
+        return False, "The selected case is no longer available."
+
+    current = cases.loc[matches].iloc[0]
+    updated_values = {
+        "status": str(status).strip(),
+        "priority": str(priority).strip(),
+        "last_seen_location": str(last_seen_location).strip(),
+        "assigned_to": str(assigned_to).strip(),
+        "case_contact": str(case_contact).strip(),
+        "notes": str(notes).strip(),
+    }
+    changed_fields = [
+        label
+        for label, value in updated_values.items()
+        if str(current.get(label, "")).strip() != value
+    ]
+    clean_activity_note = str(activity_note).strip()
+    if not changed_fields and not clean_activity_note:
+        return False, "Change a case field or add an investigation update before saving."
+
+    for field, value in updated_values.items():
+        cases.loc[matches, field] = value
+    cases.loc[matches, "last_updated_at"] = time.strftime("%Y-%m-%d %H:%M:%S")
+    write_csv_atomically(cases[CASE_RECORD_COLUMNS], CASE_RECORDS_PATH)
+
+    change_summary = ", ".join(field.replace("_", " ") for field in changed_fields)
+    timeline_details = clean_activity_note or f"Updated: {change_summary}."
+    _append_case_activity(
+        str(case_id),
+        str(activity_type).strip() or "Case update",
+        str(activity_location).strip() or updated_values["last_seen_location"],
+        "Administrator",
+        timeline_details,
+    )
+    log_event(
+        mode="Case Command Center",
+        subject_id=str(case_id),
+        role="Victim Case",
+        event_type="Case Updated",
+        details=(
+            f"Status: {updated_values['status']}; changed: "
+            f"{change_summary or 'timeline note'}"
+        ),
+    )
+    return True, f"Case {case_id} updated."
+
+
+def get_investigation_timeline(case_id: str) -> pd.DataFrame:
+    """Merge immutable human updates with raw victim-sighting records for one case."""
+    case = get_investigation_case(case_id)
+    timeline_columns = ["timestamp", "event_type", "location", "source", "actor", "details"]
+    if not case:
+        return pd.DataFrame(columns=timeline_columns)
+
+    human_activity = load_case_activity()
+    human_activity = human_activity[
+        human_activity["case_id"].astype(str) == str(case_id)
+    ]
+    manual_events = pd.DataFrame(
+        {
+            "timestamp": human_activity.get("timestamp", pd.Series(dtype=str)),
+            "event_type": human_activity.get("event_type", pd.Series(dtype=str)),
+            "location": human_activity.get("location", pd.Series(dtype=str)),
+            "source": "Investigation team",
+            "actor": human_activity.get("actor", pd.Series(dtype=str)),
+            "details": human_activity.get("details", pd.Series(dtype=str)),
+        }
+    )
+
+    try:
+        sightings = pd.read_csv(VICTIM_SIGHTING_LOG_PATH).fillna("")
+    except (FileNotFoundError, pd.errors.EmptyDataError, pd.errors.ParserError):
+        sightings = pd.DataFrame(columns=["profile_id", "name", "timestamp", "location"])
+    sightings = sightings[
+        sightings.get("profile_id", pd.Series(dtype=str)).astype(str)
+        == str(case["profile_id"])
+    ]
+    sighting_events = pd.DataFrame(
+        {
+            "timestamp": sightings.get("timestamp", pd.Series(dtype=str)),
+            "event_type": "Camera sighting recorded",
+            "location": sightings.get("location", pd.Series(dtype=str)),
+            "source": "Surveillance log",
+            "actor": "System",
+            "details": "Recorded by the active Lost Person Search workflow.",
+        }
+    )
+
+    timeline = pd.concat([manual_events, sighting_events], ignore_index=True)
+    if timeline.empty:
+        return pd.DataFrame(columns=timeline_columns)
+    timeline["_sort_timestamp"] = pd.to_datetime(timeline["timestamp"], errors="coerce")
+    return timeline.sort_values(
+        ["_sort_timestamp", "timestamp"], ascending=False, na_position="last"
+    ).drop(columns="_sort_timestamp").reset_index(drop=True)
 
 
 def convert_unknown_to_victim(
@@ -2246,6 +2628,14 @@ def clear_audit_log() -> None:
     initialize_log_files()
 
 
+def clear_case_command_data() -> None:
+    """Remove case metadata and manual updates during a full local-data reset."""
+    for data_path in (CASE_RECORDS_PATH, CASE_ACTIVITY_LOG_PATH):
+        if data_path.exists():
+            data_path.unlink()
+    initialize_log_files()
+
+
 def clear_registered_profiles() -> None:
     """Clear registered face profiles. This operation is available to Administrators only."""
     profile_paths = [profile_path for profile_path in REG_DIR.glob("*") if profile_path.is_file()]
@@ -2293,21 +2683,303 @@ def clear_unknown_face_data() -> None:
 
 
 def clear_all_surveillance_data() -> None:
-    """Remove registered faces, unknown faces, logs, and the temporary upload."""
+    """Remove registered faces, unknown faces, cases, logs, and the temporary upload."""
     clear_registered_profiles()
     clear_unknown_face_data()
     clear_audit_log()
+    clear_case_command_data()
     if TEMP_VIDEO_PATH.exists():
         TEMP_VIDEO_PATH.unlink()
 
 
+def render_status_chip(label: str, state: str, icon: str = "") -> None:
+    """Render a modern status chip: live/searching/alert/idle/threat"""
+    colors = {
+        "live": ("rgba(34, 197, 94, 0.16)", "#bbf7d0", "rgba(34, 197, 94, 0.45)", "🟢"),
+        "searching": ("rgba(37, 99, 235, 0.16)", "#bfdbfe", "rgba(37, 99, 235, 0.45)", "🔵"),
+        "alert": ("rgba(239, 68, 68, 0.16)", "#fecaca", "rgba(239, 68, 68, 0.45)", "🔴"),
+        "idle": ("rgba(100, 116, 139, 0.14)", "#cbd5e1", "rgba(100, 116, 139, 0.40)", "⚪"),
+        "threat": ("rgba(234, 88, 12, 0.16)", "#ffedd5", "rgba(234, 88, 12, 0.45)", "🟠"),
+    }
+    bg, color, border, default_icon = colors.get(state, colors["idle"])
+    icon = icon or default_icon
+    st.markdown(f"""
+        <span style="display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-weight:600; font-size:0.8rem; background:{bg}; color:{color}; border:1px solid {border};">
+            <span class="chip-dot"></span> {icon} {label}
+        </span>
+    """, unsafe_allow_html=True)
+def render_metric_card(title: str, value: str | int, delta: str | None = None,
+                       delta_color: str = "normal", icon: str = "") -> None:
+    """Render a metric card with consistent styling"""
+    delta_style = ""
+    if delta:
+        if delta_color == "normal":
+            delta_style = f'<div class="delta ok">{delta}</div>'
+        elif delta_color == "negative":
+            delta_style = f'<div class="delta bad">{delta}</div>'
+        else:
+            delta_style = f'<div class="delta warn">{delta}</div>'
+
+    st.markdown(f"""
+        <div class="metric-card">
+            <div class="label">{icon} {title}</div>
+            <div class="value">{value}</div>
+            {delta_style}
+        </div>
+    """, unsafe_allow_html=True)
+def render_camera_health_card(source_name: str, status: str, latency_ms: int | None = None,
+                             fps: float | None = None, last_frame_ts: str | None = None) -> None:
+    """Render a compact camera health/status card"""
+    status_map = {
+        "healthy": ("ok", "✅"),
+        "degraded": ("warn", "🟡"),
+        "offline": ("bad", "❌"),
+        "connecting": ("warn", "🔵"),
+    }
+    status_class, status_icon = status_map.get(status, status_map["bad"])
+    with st.container(border=True):
+        cols = st.columns([3, 1, 1, 1])
+        with cols[0]:
+            st.markdown(f"**{status_icon} {source_name}**")
+        with cols[1]:
+            st.markdown(f"**{status.upper()}**")
+        with cols[2]:
+            if latency_ms:
+                st.caption(f"{latency_ms}ms")
+        with cols[3]:
+            if fps:
+                st.caption(f"{fps:.1f} FPS")
+        if last_frame_ts:
+            st.caption(f"Last: {last_frame_ts}")
 def render_brand_logo() -> None:
     """Show the N-ONE brand mark on the current page when the asset exists."""
     if LOGO_PATH.is_file():
         st.image(str(LOGO_PATH), width=240)
 
 
-def render_sidebar() -> None:
+def render_case_command_center(
+    registered_df: pd.DataFrame | None = None,
+) -> None:
+    """Render the persistent, human-reviewed investigation workspace."""
+    profiles = registered_df if registered_df is not None else get_registered_profiles_df()
+    cases = load_investigation_cases()
+    active_cases = cases[~cases["status"].astype(str).isin(["Resolved", "Closed"])]
+
+    st.markdown("---")
+    st.subheader(":material/folder_shared: Case command center")
+    st.caption(
+        "Open a victim investigation, keep human case notes, and review camera "
+        "sightings in one chronological timeline. Camera records are evidence "
+        "leads and still require operator verification."
+    )
+
+    with st.container(horizontal=True):
+        st.metric("Active cases", len(active_cases), border=True)
+        st.metric("All cases", len(cases), border=True)
+        st.metric("Recorded updates", len(load_case_activity()), border=True)
+
+    victim_profiles = profiles[profiles["category"] == "Victim"]
+    with st.expander(":material/add_circle: Open a new victim investigation"):
+        if st.session_state.get("role") != "Administrator":
+            st.info("Only an Administrator can open or edit cases. Operators have read-only access.")
+        elif victim_profiles.empty:
+            st.info("Register a Victim profile before opening an investigation case.")
+        else:
+            victim_labels = {
+                row["profile_id"]: row["name"]
+                for _, row in victim_profiles.iterrows()
+            }
+            with st.form("open_investigation_case", clear_on_submit=True):
+                profile_id = st.selectbox(
+                    "Victim profile",
+                    options=list(victim_labels),
+                    format_func=lambda value: victim_labels[value],
+                )
+                create_col1, create_col2 = st.columns(2)
+                with create_col1:
+                    priority = st.selectbox("Priority", CASE_PRIORITY_OPTIONS, index=1)
+                    assigned_to = st.text_input("Assigned investigator (optional)")
+                    case_contact = st.text_input("Case contact (optional)")
+                with create_col2:
+                    last_seen_location = st.text_input("Last known location (optional)")
+                    notes = st.text_area("Opening notes (optional)", height=100)
+                create_submitted = st.form_submit_button(
+                    "Open investigation case", type="primary", width="stretch"
+                )
+            if create_submitted:
+                created, message, new_case_id = create_investigation_case(
+                    profile_id=profile_id,
+                    priority=priority,
+                    last_seen_location=last_seen_location,
+                    assigned_to=assigned_to,
+                    case_contact=case_contact,
+                    notes=notes,
+                )
+                if created:
+                    st.session_state["selected_investigation_case"] = new_case_id
+                    st.toast(message)
+                    st.rerun()
+                else:
+                    st.error(message)
+
+    if cases.empty:
+        st.info("No investigation case has been opened yet.")
+        return
+
+    case_overview = cases[
+        [
+            "case_id",
+            "subject_name",
+            "status",
+            "priority",
+            "last_seen_location",
+            "assigned_to",
+            "last_updated_at",
+        ]
+    ].rename(
+        columns={
+            "case_id": "Case ID",
+            "subject_name": "Victim",
+            "status": "Status",
+            "priority": "Priority",
+            "last_seen_location": "Last known location",
+            "assigned_to": "Assigned investigator",
+            "last_updated_at": "Last updated",
+        }
+    )
+    with st.container(border=True):
+        st.markdown("**Case register**")
+        st.dataframe(case_overview, hide_index=True, height=240, width="stretch")
+
+    case_ids = cases["case_id"].tolist()
+    selected_case_key = "selected_investigation_case"
+    if (
+        selected_case_key in st.session_state
+        and st.session_state[selected_case_key] not in case_ids
+    ):
+        del st.session_state[selected_case_key]
+    selected_case_id = st.selectbox(
+        "Open case workspace",
+        options=case_ids,
+        format_func=lambda value: (
+            f"{value} — "
+            f"{cases.loc[cases['case_id'] == value, 'subject_name'].iloc[0]}"
+        ),
+        key=selected_case_key,
+    )
+    case = get_investigation_case(selected_case_id)
+    if not case:
+        st.warning("The selected case could not be loaded.")
+        return
+
+    with st.container(border=True):
+        st.markdown(f"**{case['subject_name']} · {case['case_id']}**")
+        summary_col1, summary_col2, summary_col3, summary_col4 = st.columns(4)
+        summary_col1.metric("Status", case["status"] or "Open")
+        summary_col2.metric("Priority", case["priority"] or "Medium")
+        summary_col3.metric("Opened", case["opened_at"] or "Unavailable")
+        summary_col4.metric("Last updated", case["last_updated_at"] or "Unavailable")
+        if case.get("assigned_to"):
+            st.write(f"**Assigned investigator:** {case['assigned_to']}")
+        if case.get("last_seen_location"):
+            st.write(f"**Last known location:** {case['last_seen_location']}")
+        if case.get("case_contact"):
+            st.write(f"**Case contact:** {case['case_contact']}")
+        if case.get("notes"):
+            st.write(f"**Case notes:** {case['notes']}")
+
+    timeline = get_investigation_timeline(selected_case_id)
+    with st.container(border=True):
+        st.markdown("**Investigation timeline**")
+        if timeline.empty:
+            st.info("No manual updates or camera sightings have been recorded for this case.")
+        else:
+            st.dataframe(
+                timeline.rename(
+                    columns={
+                        "timestamp": "Time",
+                        "event_type": "Event",
+                        "location": "Location",
+                        "source": "Source",
+                        "actor": "Recorded by",
+                        "details": "Details",
+                    }
+                ),
+                hide_index=True,
+                height=320,
+                width="stretch",
+            )
+
+    if st.session_state.get("role") != "Administrator":
+        st.caption("Operator access is read-only. Ask an Administrator to update case status or notes.")
+        return
+
+    with st.expander(":material/edit_note: Add investigation update"):
+        current_status = case.get("status", "Open")
+        current_priority = case.get("priority", "Medium")
+        status_index = (
+            CASE_STATUS_OPTIONS.index(current_status)
+            if current_status in CASE_STATUS_OPTIONS
+            else 0
+        )
+        priority_index = (
+            CASE_PRIORITY_OPTIONS.index(current_priority)
+            if current_priority in CASE_PRIORITY_OPTIONS
+            else 1
+        )
+        with st.form(f"update_investigation_case_{selected_case_id}"):
+            update_col1, update_col2 = st.columns(2)
+            with update_col1:
+                status = st.selectbox("Case status", CASE_STATUS_OPTIONS, index=status_index)
+                priority = st.selectbox("Priority", CASE_PRIORITY_OPTIONS, index=priority_index)
+                assigned_to = st.text_input(
+                    "Assigned investigator (optional)", value=case.get("assigned_to", "")
+                )
+                case_contact = st.text_input(
+                    "Case contact (optional)", value=case.get("case_contact", "")
+                )
+            with update_col2:
+                last_seen_location = st.text_input(
+                    "Last known location (optional)", value=case.get("last_seen_location", "")
+                )
+                activity_type = st.selectbox(
+                    "Update type",
+                    [
+                        "Case update",
+                        "Lead reported",
+                        "Lead verified",
+                        "False lead",
+                        "Status review",
+                    ],
+                )
+                activity_location = st.text_input("Update location (optional)")
+                activity_note = st.text_area("Investigation update", height=100)
+            notes = st.text_area("Case notes", value=case.get("notes", ""), height=100)
+            update_submitted = st.form_submit_button(
+                "Save investigation update", type="primary", width="stretch"
+            )
+        if update_submitted:
+            updated, message = update_investigation_case(
+                case_id=selected_case_id,
+                status=status,
+                priority=priority,
+                last_seen_location=last_seen_location,
+                assigned_to=assigned_to,
+                case_contact=case_contact,
+                notes=notes,
+                activity_type=activity_type,
+                activity_location=activity_location,
+                activity_note=activity_note,
+            )
+            if updated:
+                st.toast(message)
+                st.rerun()
+            else:
+                st.error(message)
+
+
+def render_operator_sidebar() -> None:
+    """Render a minimal sidebar for Operator role: auth + CPU saver + active case."""
     st.sidebar.title("🔐 N-ONE Security Gate")
     if LOGO_PATH.is_file():
         st.sidebar.image(str(LOGO_PATH), width=180)
@@ -2323,7 +2995,94 @@ def render_sidebar() -> None:
             "or the process environment."
         )
         return
-    
+
+    if st.session_state.authenticated:
+        if st.sidebar.button("🔒 Logout System", width='stretch'):
+            st.session_state.streaming = False
+            st.session_state.authenticated = False
+            st.session_state.role = "Guest"
+            st.rerun()
+        st.sidebar.markdown(f"**Current Role:** {st.session_state.role}")
+    else:
+        st.sidebar.info("Login to access the command center.")
+        username = st.sidebar.text_input("Username", key="login_username")
+        password = st.sidebar.text_input("Password", type="password", key="login_password")
+        if st.sidebar.button("Login", width='stretch'):
+            now = time.monotonic()
+            locked_until = st.session_state.get("login_locked_until", 0.0)
+            if now < locked_until:
+                remaining = max(1, int(locked_until - now) + 1)
+                st.sidebar.error(f"Too many failed attempts. Try again in {remaining} seconds.")
+                return
+
+            authenticated_role = None
+            if (
+                hmac.compare_digest(username, credentials["ADMIN_USERNAME"])
+                and hmac.compare_digest(password, credentials["ADMIN_PASSWORD"])
+            ):
+                authenticated_role = "Administrator"
+            elif (
+                hmac.compare_digest(username, credentials["OPERATOR_USERNAME"])
+                and hmac.compare_digest(password, credentials["OPERATOR_PASSWORD"])
+            ):
+                authenticated_role = "Operator"
+
+            if authenticated_role is not None:
+                st.session_state.login_attempts = 0
+                st.session_state.login_locked_until = 0.0
+                st.session_state.authenticated = True
+                st.session_state.role = authenticated_role
+                st.rerun()
+            else:
+                st.session_state.login_attempts += 1
+                if st.session_state.login_attempts >= MAX_LOGIN_ATTEMPTS:
+                    st.session_state.login_locked_until = now + LOGIN_LOCKOUT_SECONDS
+                    st.session_state.login_attempts = 0
+                    st.sidebar.error("Too many failed attempts. Login is locked for 60 seconds.")
+                else:
+                    st.sidebar.error("Invalid credentials.")
+
+    if st.session_state.authenticated:
+        st.sidebar.markdown("---")
+        st.sidebar.toggle(
+            "CPU saver (recommended)",
+            key="cpu_saver_mode",
+            help="Uses the faster OpenCV detector, a smaller scan image, and a 2.5 FPS face-scan limit. Turn it off only when maximum detection frequency is required.",
+        )
+
+    # Operator-only: show active case read-only
+    if st.session_state.role == "Operator":
+        st.sidebar.markdown("---")
+        st.sidebar.caption("Active Case")
+        cases = load_investigation_cases()
+        active_cases = cases[~cases["status"].astype(str).isin(["Resolved", "Closed"])]
+        if not active_cases.empty:
+            latest = active_cases.iloc[-1]
+            st.sidebar.info(f"Case: {latest.get('subject_name', '—')} ({latest.get('case_id', '—')})")
+            st.sidebar.caption(f"Status: {latest.get('status', 'Open')}")
+        else:
+            st.sidebar.info("No active cases.")
+        st.sidebar.caption("Operator access is read-only. Ask an Administrator to open or update cases.")
+
+
+def render_administrator_sidebar() -> None:
+    """Render the full sidebar for Administrator role: profile registration, AI config, admin actions."""
+    st.sidebar.title("🔐 N-ONE Security Gate")
+    if LOGO_PATH.is_file():
+        st.sidebar.image(str(LOGO_PATH), width=180)
+    st.sidebar.caption("RBAC access control for surveillance ops")
+
+    try:
+        credentials = load_auth_credentials()
+    except RuntimeError:
+        st.sidebar.error("Authentication is unavailable: required secrets are not configured.")
+        st.sidebar.caption(
+            "Configure ADMIN_USERNAME, ADMIN_PASSWORD, OPERATOR_USERNAME, and "
+            "OPERATOR_PASSWORD in Streamlit Secrets "
+            "or the process environment."
+        )
+        return
+
     if st.session_state.authenticated:
         if st.sidebar.button("🔒 Logout System", width='stretch'):
             st.session_state.streaming = False
@@ -2637,7 +3396,7 @@ def render_sidebar() -> None:
             disabled=not deletion_confirmed,
         ):
             clear_all_surveillance_data()
-            st.sidebar.success("All registered, unknown, log, and temporary-upload data deleted.")
+            st.sidebar.success("All registered, unknown, case, log, and temporary-upload data deleted.")
             st.rerun()
 
     return
@@ -2645,198 +3404,245 @@ def render_sidebar() -> None:
 
 
 def render_main_ui() -> None:
+    """Main UI with 2-column layout: controls left, video feed right during live mode."""
     render_brand_logo()
     st.title("🎯 N-ONE COMMAND CENTER")
 
-    st.subheader("⚙️ Operational Console")
-    col_ctrl1, col_ctrl2 = st.columns(2)
-    mode = col_ctrl1.selectbox(
-        "Select Active Surveillance Mode",
-        ["1. Lost Person Search", "2. Member Attendance Logger", "3. Threat Detection Mode"],
-        key="selected_mode", help="Select the primary mission for the AI."
-    )
-    switch_to_browser = st.session_state.pop("switch_to_browser_camera", False)
-    if switch_to_browser:
-        # Apply this before creating the radio widget; Streamlit does not allow
-        # changing a widget's session-state value after the widget is rendered.
-        st.session_state["input_source"] = "Browser Webcam (WebRTC)"
-    camera_fallback_message = st.session_state.pop(
-        "camera_fallback_message", ""
-    )
-    camera_fallback_details = st.session_state.pop(
-        "camera_fallback_details", ""
-    )
-    source_type = col_ctrl2.radio(
-        "Select Video Input Source",
-        ["Browser Webcam (WebRTC)", "Laptop Webcam", "Recorded Video File", "IP Camera Stream"],
-        horizontal=True,
-        key="input_source",
-        help="Laptop Webcam can access cameras attached to the machine running Streamlit. If OpenCV cannot open one, N-ONE offers the browser camera as a fallback.",
-    )
-    if camera_fallback_message:
-        st.info(camera_fallback_message)
-        if camera_fallback_details:
-            with st.expander("Local webcam attempt details"):
-                st.caption(camera_fallback_details)
-
-    video_target = None
-    browser_camera = source_type == "Browser Webcam (WebRTC)"
-    if source_type == "Laptop Webcam":
-        video_target = 0
-    elif source_type == "Recorded Video File":
-        uploaded_video = st.file_uploader("Upload Video File", type=["mp4", "avi", "mov"])
-        if uploaded_video:
-            TEMP_VIDEO_PATH.write_bytes(uploaded_video.getbuffer())
-            video_target = str(TEMP_VIDEO_PATH)
-    elif source_type == "IP Camera Stream":
-        video_target = st.text_input("Enter RTSP / HTTP Stream URL", placeholder="rtsp://...")
-
-    camera_location = st.text_input(
-        "Camera location",
-        key="camera_location",
-        help="This location is saved with unknown tracking and victim sightings.",
-    ).strip() or "Main Feed"
-
-    st.markdown("---")
+    # Load data
     log_df = pd.read_csv(CSV_LOG_PATH) if CSV_LOG_PATH.exists() and CSV_LOG_PATH.stat().st_size > 0 else pd.DataFrame()
     registered_df = get_registered_profiles_df()
+    unknown_count = get_unknown_face_count()
 
-    victim_search_target = None
-    if is_victim_search_mode(mode):
-        victim_profiles = registered_df[registered_df["category"] == "Victim"]
-        if victim_profiles.empty:
-            st.warning("No Victim profile is registered. An Administrator must register a Victim first.")
-        else:
-            victim_labels = {
-                row["profile_id"]: row["name"]
-                for _, row in victim_profiles.iterrows()
-            }
-            victim_search_target = st.selectbox(
-                "Victim to search for",
-                options=list(victim_labels),
-                format_func=lambda profile_id: victim_labels[profile_id],
-                key="victim_search_target",
-                help="Only this Victim profile will be shown as a match. Other faces are tracked silently as unknown.",
+    # ---------- CONTROL PANEL ----------
+    with st.container(border=True):
+        st.subheader("⚙️ Operational Console")
+
+        # Row 1: Mode + Source
+        col_mode, col_source = st.columns([1, 2])
+        with col_mode:
+            mode = st.selectbox(
+                "Mode",
+                ["1. Lost Person Search", "2. Member Attendance Logger", "3. Threat Detection Mode"],
+                key="selected_mode", help="Select the primary mission for the AI."
             )
-            st.caption(
-                "Victim search mode matches only the selected Victim. Unknown faces are saved silently for later review."
+        with col_source:
+            switch_to_browser = st.session_state.pop("switch_to_browser_camera", False)
+            if switch_to_browser:
+                st.session_state["input_source"] = "Browser Webcam (WebRTC)"
+            camera_fallback_message = st.session_state.pop("camera_fallback_message", "")
+            camera_fallback_details = st.session_state.pop("camera_fallback_details", "")
+            source_type = st.radio(
+                "Video Source",
+                ["Browser Webcam (WebRTC)", "Laptop Webcam", "Recorded Video File", "IP Camera Stream"],
+                horizontal=True,
+                key="input_source",
+                help="Laptop Webcam accesses server-attached cameras. If unavailable, browser WebRTC is offered.",
             )
+            if camera_fallback_message:
+                st.info(camera_fallback_message)
+                if camera_fallback_details:
+                    with st.expander("Local webcam attempt details"):
+                        st.caption(camera_fallback_details)
 
-    col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-    col_m1.metric("Active Role", st.session_state.role)
-    col_m2.metric("Registered Faces", len(registered_df))
-    col_m3.metric("Unknown Faces", get_unknown_face_count())
-    col_m4.metric("Total Log Events", len(log_df))
-
-    button_label = "Stop Surveillance" if st.session_state.streaming else "Start Surveillance"
-    if st.button(button_label, width='stretch', type="primary" if not st.session_state.streaming else "secondary"):
-        if not st.session_state.streaming and video_target is None and not browser_camera:
-            st.error("Cannot start stream: no valid video source selected.")
-        elif not st.session_state.streaming and is_victim_search_mode(mode) and not victim_search_target:
-            st.error("Select a Victim profile before starting Lost Person Search.")
-        else:
-            st.session_state.streaming = not st.session_state.streaming
-            st.rerun()
-
-    if st.session_state.streaming:
-        st.markdown(
-            '<div class="surveillance-state live"><span class="status-dot"></span>'
-            'Surveillance is live — camera feed is processing.</div>',
-            unsafe_allow_html=True,
-        )
-    else:
-        st.markdown(
-            '<div class="surveillance-state offline"><span class="status-dot"></span>'
-            'Surveillance is offline — press Start Surveillance to begin.</div>',
-            unsafe_allow_html=True,
-        )
-
-    st.markdown("---")
-    status_area = st.empty()
-    match_area = st.empty()
-    victim_match_area = st.empty()
-    render_detection_result(match_area)
-    render_victim_found_result(victim_match_area)
-    frame_placeholder = st.empty()
-
-    # Keep the live controls and result panel above the secondary profile
-    # inventory/photo sections so operators see the mission state first.
-    render_face_inventory_panel(registered_df)
-    render_face_photo_gallery(registered_df)
-
-    if browser_camera and st.session_state.streaming:
-        frame_placeholder.empty()
-        render_browser_camera(mode, victim_search_target, camera_location)
-    elif st.session_state.streaming and video_target is not None:
-        cap, source_status = open_video_source(video_target)
-        if cap is None:
+        # Row 2: Source-specific config
+        video_target = None
+        browser_camera = source_type == "Browser Webcam (WebRTC)"
+        with st.container():
             if source_type == "Laptop Webcam":
-                st.session_state["switch_to_browser_camera"] = True
-                st.session_state["camera_fallback_message"] = (
-                    "OpenCV could not access the server webcam. N-ONE switched to the browser camera; "
-                    "allow camera access and press START in its panel."
-                )
-                st.session_state["camera_fallback_details"] = source_status
-                st.rerun()
-            else:
-                st.session_state.streaming = False
-                st.error(source_status)
-                status_area.error("Surveillance feed could not be started.")
-                frame_placeholder.error(
-                    "Feed unavailable. Select Recorded Video File, or allow webcam access "
-                    "and use WebRTC when the app is running remotely."
-                )
-        else:
-            if source_status:
-                status_area.info(f"Source: {source_status}")
-            while st.session_state.streaming:
-                ret, frame = cap.read()
-                if not ret:
-                    st.session_state.streaming = False
-                    st.warning("Video stream ended or file finished.")
-                    cap.release()
-                    st.rerun()
-                    break
+                video_target = 0
+                st.caption("💻 Using server-attached webcam (device 0)")
+            elif source_type == "Recorded Video File":
+                uploaded_video = st.file_uploader("Upload Video File", type=["mp4", "avi", "mov"])
+                if uploaded_video:
+                    TEMP_VIDEO_PATH.write_bytes(uploaded_video.getbuffer())
+                    video_target = str(TEMP_VIDEO_PATH)
+            elif source_type == "IP Camera Stream":
+                video_target = st.text_input("RTSP / HTTP Stream URL", placeholder="rtsp://user:pass@ip:554/stream", key="rtsp_url")
 
-                if not _frame_has_content(frame):
-                    st.session_state.streaming = False
-                    message = (
-                        "Camera returned a black/empty frame. Check camera permission, "
-                        "another app using the camera, or use WebRTC for a remote app."
+        # Row 3: Camera location + Victim selector (if in victim search)
+        col_loc, col_victim = st.columns([1, 1])
+        with col_loc:
+            camera_location = st.text_input(
+                "Camera location",
+                key="camera_location",
+                help="Saved with unknown tracking and victim sightings.",
+            ).strip() or "Main Feed"
+
+        victim_search_target = None
+        with col_victim:
+            if is_victim_search_mode(mode):
+                victim_profiles = registered_df[registered_df["category"] == "Victim"]
+                if victim_profiles.empty:
+                    st.warning("No Victim profile registered. Admin must register a Victim first.")
+                else:
+                    victim_labels = {row["profile_id"]: row["name"] for _, row in victim_profiles.iterrows()}
+                    victim_search_target = st.selectbox(
+                        "Victim to search",
+                        options=list(victim_labels),
+                        format_func=lambda pid: victim_labels[pid],
+                        key="victim_search_target",
+                        help="Only this Victim is matched. Other faces tracked silently as unknown.",
                     )
-                    status_area.error(message)
-                    frame_placeholder.error(message)
-                    cap.release()
-                    break
-                
-                annotated_frame, detection_summary = process_frame(
-                    frame,
-                    mode,
-                    target_profile_id=victim_search_target,
-                    location=camera_location,
-                )
-                
-                status_text = st.session_state.get('last_status', "Idle")
-                status_area.info(f"Last Status: {status_text}")
+                    st.caption("Victim search matches only selected target. Others → unknown DB.")
+
+        # Row 4: Metrics (using custom metric cards)
+        m1, m2, m3, m4 = st.columns(4)
+        with m1:
+            render_metric_card("Role", st.session_state.role, icon="👤")
+        with m2:
+            render_metric_card("Registered", len(registered_df), icon="👥")
+        with m3:
+            render_metric_card("Unknown", unknown_count, icon="❓")
+        with m4:
+            render_metric_card("Log Events", len(log_df), icon="📋")
+
+        # Row 5: Start/Stop button + Live status
+        col_btn, col_status = st.columns([1, 3])
+        with col_btn:
+            button_label = "Stop Surveillance" if st.session_state.streaming else "Start Surveillance"
+            if st.button(button_label, width='stretch', type="primary" if not st.session_state.streaming else "secondary"):
+                if not st.session_state.streaming and video_target is None and not browser_camera:
+                    st.error("Cannot start stream: no valid video source selected.")
+                elif not st.session_state.streaming and is_victim_search_mode(mode) and not victim_search_target:
+                    st.error("Select a Victim profile before starting Lost Person Search.")
+                else:
+                    st.session_state.streaming = not st.session_state.streaming
+                    st.rerun()
+        with col_status:
+            if st.session_state.streaming:
+                render_status_chip("LIVE", "live", "🔴")
+            else:
+                render_status_chip("IDLE", "idle", "⚪")
+
+    # ---------- LIVE MODE: 2-column layout ----------
+    if st.session_state.streaming:
+        # LEFT COLUMN: Controls + Detection Results
+        # RIGHT COLUMN: Video Feed
+        left_col, right_col = st.columns([1, 2], gap="large")
+
+        with left_col:
+            with st.container(border=True):
+                st.markdown("### 🎮 Live Controls")
+
+                # Quick threshold slider (only for face modes)
+                if is_victim_search_mode(mode) or is_member_attendance_mode(mode):
+                    threshold = st.slider(
+                        "Similarity Threshold",
+                        0.0, 1.0,
+                        st.session_state.get("similarity_threshold", COSINE_THRESHOLD),
+                        0.01,
+                        key="live_threshold",
+                        help="Lower = stricter match"
+                    )
+                    st.session_state.similarity_threshold = threshold
+
+                # Quick actions
+                a1, a2 = st.columns(2)
+                with a1:
+                    if st.button("📸 Snapshot", width="stretch", disabled=not st.session_state.streaming):
+                        st.session_state["request_snapshot"] = True
+                with a2:
+                    if st.button("⏹️ Stop", width="stretch", type="secondary"):
+                        st.session_state.streaming = False
+                        st.rerun()
+
+            # Detection Results Panel
+            with st.container(border=True):
+                st.markdown("### 📡 Detection Results")
+                status_area = st.empty()
+                match_area = st.empty()
+                victim_match_area = st.empty()
                 render_detection_result(match_area)
                 render_victim_found_result(victim_match_area)
-                final_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
-                frame_placeholder.image(final_frame, width='stretch')
-                
-                time.sleep(
-                    CPU_SAVER_DISPLAY_INTERVAL_SECONDS
-                    if cpu_saver_enabled()
-                    else 0.01
-                )
 
-        if cap is not None and cap.isOpened():
-            cap.release()
-    elif browser_camera:
-        frame_placeholder.info("Browser webcam is offline. Press Start Surveillance, then press START in the camera panel.")
+                # Live status text
+                status_text = st.session_state.get('last_status', "Idle")
+                status_area.info(f"Status: {status_text}")
+
+        with right_col:
+            # Video Feed with wrapper
+            with st.container(border=True):
+                st.markdown("### 📹 Live Feed")
+                frame_placeholder = st.empty()
+
+        # Render the video stream (WebRTC or OpenCV)
+        if browser_camera:
+            frame_placeholder.empty()
+            render_browser_camera(mode, victim_search_target, camera_location)
+        elif video_target is not None:
+            cap, source_status = open_video_source(video_target)
+            if cap is None:
+                if source_type == "Laptop Webcam":
+                    st.session_state["switch_to_browser_camera"] = True
+                    st.session_state["camera_fallback_message"] = (
+                        "OpenCV could not access the server webcam. N-ONE switched to the browser camera; "
+                        "allow camera access and press START in its panel."
+                    )
+                    st.session_state["camera_fallback_details"] = source_status
+                    st.rerun()
+                else:
+                    st.session_state.streaming = False
+                    st.error(source_status)
+                    frame_placeholder.error(
+                        "Feed unavailable. Select Recorded Video File, or allow webcam access "
+                        "and use WebRTC when the app is running remotely."
+                    )
+            else:
+                if source_status:
+                    # We can't easily update left_col status_area from here without rerun
+                    pass
+                while st.session_state.streaming:
+                    ret, frame = cap.read()
+                    if not ret:
+                        st.session_state.streaming = False
+                        st.warning("Video stream ended or file finished.")
+                        cap.release()
+                        st.rerun()
+                        break
+
+                    if not _frame_has_content(frame):
+                        st.session_state.streaming = False
+                        message = (
+                            "Camera returned a black/empty frame. Check camera permission, "
+                            "another app using the camera, or use WebRTC for a remote app."
+                        )
+                        frame_placeholder.error(message)
+                        cap.release()
+                        break
+
+                    annotated_frame, detection_summary = process_frame(
+                        frame,
+                        mode,
+                        target_profile_id=victim_search_target,
+                        location=camera_location,
+                    )
+
+                    # Update detection result panels in left column via session state
+                    # The panels read from st.session_state.get("last_detection")
+                    final_frame = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+                    frame_placeholder.image(final_frame, width='stretch')
+
+                    time.sleep(
+                        CPU_SAVER_DISPLAY_INTERVAL_SECONDS
+                        if cpu_saver_enabled()
+                        else 0.01
+                    )
+
+            if cap is not None and cap.isOpened():
+                cap.release()
+        else:
+            frame_placeholder.info("Surveillance feed is offline. Select a source and start the stream.")
+
     else:
-        frame_placeholder.info("Surveillance feed is offline. Select a source and start the stream.")
+        # ---------- IDLE MODE: Show video placeholder + analysis panels ----------
+        with st.container(border=True):
+            st.markdown("### 📹 Video Feed")
+            st.info("Surveillance feed is offline. Select a source and press Start Surveillance to begin.")
+            # Show a placeholder image or just text
+            st.image(str(LOGO_PATH) if LOGO_PATH.is_file() else None, caption="N-ONE Ready")
 
-
+    # ---------- ANALYSIS PANELS (Tabs at bottom) ----------
+    render_analysis_tabs(registered_df)
 def render_face_inventory_panel(registered_df: pd.DataFrame | None = None) -> None:
     """Show registered-face categories and counts to Administrators and Operators."""
     profiles = registered_df if registered_df is not None else get_registered_profiles_df()
@@ -3064,11 +3870,33 @@ def render_face_photo_gallery(registered_df: pd.DataFrame | None = None) -> None
                             st.error(message)
 
 
+def render_analysis_tabs(registered_df: pd.DataFrame) -> None:
+    """Group secondary panels into tabs: Inventory, Gallery, Cases, Analytics, Logs."""
+    tab_inventory, tab_gallery, tab_cases, tab_analytics, tab_logs = st.tabs([
+        "📋 Inventory", "🖼️ Gallery", "📁 Cases", "🔬 Analytics", "📊 Logs"
+    ])
+
+    with tab_inventory:
+        render_face_inventory_panel(registered_df)
+
+    with tab_gallery:
+        render_face_photo_gallery(registered_df)
+
+    with tab_cases:
+        render_case_command_center(registered_df)
+
+    with tab_analytics:
+        render_facial_analytics_panel()
+
+    with tab_logs:
+        render_log_viewer()
+
+
 def render_facial_analytics_panel() -> None:
     """Render facial analytics and verification tools."""
     st.markdown("---")
     st.subheader("🔬 Facial Analytics & Verification Tools")
-    
+
     analytics_tab1, analytics_tab2, analytics_tab3 = st.tabs(
         ["Face Comparison", "Batch Analysis", "Detection Tuning"]
     )
@@ -3205,18 +4033,18 @@ def main() -> None:
     initialize_directories()
     initialize_log_files()
     configure_session_state()
-    
-    render_sidebar()
+
+    if st.session_state.get("role") == "Administrator":
+        render_administrator_sidebar()
+    else:
+        render_operator_sidebar()
     if not st.session_state.authenticated:
         render_brand_logo()
-    
+
     if st.session_state.authenticated:
         model_name, detector_backend, _ = get_runtime_face_settings()
         load_known_face_encodings(model_name, detector_backend)
         render_main_ui()
-        render_facial_analytics_panel()
-        if st.toggle("Show audit and detection logs", key="show_log_viewer"):
-            render_log_viewer()
     else:
         st.warning("🔒 System locked. Please authenticate via the sidebar.")
 

@@ -102,6 +102,7 @@ The first command is the safest option because it directly uses the project's in
 *   **Intuitive User Interface:** A modern dark UI dashboard built with Streamlit provides an accessible and efficient operational experience for authenticated users.
 *   **Role-Based Access Control:** Administrators can register profiles and manage settings; Operators can run analysis and view results without destructive controls.
 *   **Face-Only Profile Capture:** Administrator registration supports browser camera capture or upload, validates exactly one face, previews the crop, and saves only the face region.
+*   **Case Command Center & Investigation Timeline:** Administrators can open a priority-based investigation for a registered Victim, assign it, maintain human-reviewed status/lead notes, and review manual updates beside the linked camera-sighting history. Operators have read-only case access.
 *   **Comprehensive Audit & Logging:** Real-time CSV logging and downloadable interactive data tables facilitate thorough post-event analysis, compliance, and operational transparency.
 *   **Proactive Threat Detection:** Incorporates heuristic/contour analysis and deep learning models for early detection of hazardous objects and weapons, significantly improving security posture.
 *   **Persistent Unknown Person Tracking:** Automatically registers, logs, and re-identifies unknown individuals in face-recognition modes; during Victim Search this tracking is silent while only the selected Victim can be shown.
@@ -112,6 +113,7 @@ The first command is the safest option because it directly uses the project's in
 *   **Data Privacy Concerns:** Facial recognition capabilities necessitate stringent adherence to privacy regulations and ethical guidelines for data handling and storage.
 *   **Scalability:** While designed for versatility, scaling to a very large number of simultaneous high-resolution video streams might require further optimization and distributed computing architectures.
 *   **False Positives/Negatives in Threat Detection:** Heuristic and model-based weapon detection, while advanced, can still produce false alerts or miss novel/obscure threats, requiring human oversight.
+*   **Case Evidence Needs Review:** A camera-sighting record is an investigation lead, not proof of identity or an automatic case resolution. An authorized human must verify evidence and update the case status.
 
 ## 3. PROBLEM STATEMENT
 Current surveillance systems often lack the integration and intelligence required to address multi-faceted security challenges effectively. Traditional setups typically operate in siloed modes, offering either basic recording, rudimentary motion detection, or isolated facial recognition, without a unified approach to diverse threat vectors. This fragmentation leads to delayed responses in critical situations, inefficient monitoring of specific targets (e.g., lost persons), and a reactive rather than proactive security posture. Furthermore, the absence of robust role-based access controls and structured audit trails compromises data integrity and accountability. The manual processing of surveillance footage for identifying individuals or detecting threats is labor-intensive, error-prone, and unsustainable for large-scale or continuous monitoring operations. There is a critical need for an integrated, intelligent, and adaptable surveillance platform that can dynamically switch between operational modes, provide high-accuracy identification, and offer comprehensive logging and access control, thereby enhancing overall security efficacy and operational efficiency.
@@ -125,6 +127,7 @@ The primary objectives of the N-ONE platform are:
 *   To construct a Subject Profile Registration Engine for secure enrollment and management of target individuals (lost persons) and authorized personnel.
 *   To implement a system for tracking and re-identifying unknown individuals, complete with a persistent database and sighting logs.
 *   To implement a robust Structured Audit & Logging Engine that provides real-time event logging in CSV format and offers interactive, downloadable data tables for retrospective analysis.
+*   To provide a case-management workspace that links each registered Victim to priority, ownership, status, human-reviewed investigation notes, and a chronological sighting timeline.
 *   To create an intuitive and responsive user interface using Streamlit, providing a modern dark-themed dashboard for efficient system operation and monitoring.
 *   To enhance perimeter security through advanced heuristic/contour analysis and deep learning models for the detection of hazardous objects and weapons.
 
@@ -149,6 +152,7 @@ Weapon detection research has similarly benefited from deep learning, moving bey
 | **User Interface**           | Often clunky, desktop-only, or dated web interfaces        | **Modern Streamlit UI:** Intuitive, dark-themed, web-based dashboard              |
 | **Access Control**           | Basic user accounts, often lacking granular permissions    | **RBAC:** Administrator profile/settings access and Operator analysis/read-only access |
 | **Audit & Logging**          | Manual review of footage, simple event logs, non-structured | **Structured Audit & Logging Engine:** Real-time CSV, interactive data tables     |
+| **Investigation Workflow**   | Separate notes and manual video review                     | **Case Command Center:** Priority, ownership, reviewable lead notes, status, and linked sighting timeline |
 | **Scalability (initial)**    | Limited by hardware and software integration complexity    | Designed for modularity; extensible for diverse environments (requires resources) |
 | **Deployment Complexity**    | Often vendor-locked, complex setup and configuration       | Python-based, leverages open-source libraries, simpler deployment for developers |
 | **Proactiveness**            | Reactive (post-event analysis)                             | **Proactive:** Real-time alerts, dynamic mode switching, instant identification    |

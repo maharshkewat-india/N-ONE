@@ -53,9 +53,10 @@
    - **Anti‑Spoofing Detection** (optional)
    - **Facial Attribute Analysis** (age, gender, emotion, race)
 4. **Event Annotation** → Annotated frames returned to UI for real‑time feedback.
-5. **Persistent Logging** → All events appended to `detection_logs/system_audit_logs.csv`.
+5. **Persistent Logging** → System events, Unknown sightings, and Victim sightings are written to local CSV records.
 6. **Unknown Person Handling** → Automated re‑identification, previous sighting lookup, current DB update, and live date/time/location feedback.
-7. **Configuration Management** → Sidebar settings control models, backends, thresholds, and feature toggles.
+7. **Case Command Center** → Administrators open and update a registered Victim's case; the workspace merges immutable human updates with that profile's camera-sighting history. Operators can inspect but cannot modify cases.
+8. **Configuration Management** → Sidebar settings control models, backends, thresholds, and feature toggles.
 
 ## Directory Layout (Updated)
 
@@ -72,7 +73,10 @@ project_n_one/
 ├── registered_faces/              # Images of registered subjects
 ├── unknown_faces/                 # Auto‑captured unknown faces
 ├── detection_logs/                # CSV audit logs
-│   └── system_audit_logs.csv
+│   ├── system_audit_logs.csv
+│   ├── victim_sighting_log.csv
+│   ├── investigation_cases.csv      # Case status, priority, assignment, notes
+│   └── case_activity_log.csv        # Human-reviewed case actions
 ├── unknown_person_db.csv          # Database of unique unknown persons
 ├── unknown_sighting_log.csv       # Sighting timestamp/location log
 └── temp_current_frame.jpg         # Temporary frame storage (cleared on reset)
@@ -95,3 +99,5 @@ The same dashboard provides a read-only photo viewer with `Registered`, `Victim`
 The recommended live source is `Browser Webcam (WebRTC)`. The server-side `Laptop Webcam` option remains useful when the camera is attached to the machine running Streamlit; it can show a black frame when the app is remote, permission is denied, or another process owns the device.
 
 Victim location history is stored in `detection_logs/victim_sighting_log.csv`. Unknown data remains in `unknown_person_db.csv`, `unknown_sighting_log.csv`, and `unknown_faces/`.
+
+The Case Command Center creates one active case per Victim profile, with `Open`, `Verified Lead`, `Resolved`, and `Closed` states plus Low-to-Critical priority. A new case and every administrative update is saved in `detection_logs/investigation_cases.csv` and `detection_logs/case_activity_log.csv`; existing camera sighting records are read into the case timeline without duplicating them. A camera record is a lead for review, not proof of identity or automatic resolution.
